@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Image from "next/image";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -20,7 +21,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen w-full bg-canvas-background text-charcoal-ink font-serif flex items-stretch select-none overflow-x-hidden">
       
-      <div className="hidden lg:flex lg:w-[60%] bg-gradient-to-br from-[#fcf9f2] via-[#faf4e8] to-[#f4ecd8] border-r border-image-frame flex-col justify-between p-16 relative overflow-hidden">
+      <div className="hidden lg:flex lg:w-[60%] bg-linear-to-br from-[#fcf9f2] via-[#faf4e8] to-[#f4ecd8] border-r border-image-frame flex-col justify-between p-16 relative overflow-hidden">
         
         <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-brand-primary/10 blur-3xl pointer-events-none"></div>
         <div className="absolute -bottom-32 -right-32 w-100 h-100 rounded-full bg-brand-secondary/5 blur-3xl pointer-events-none"></div>
@@ -35,7 +36,7 @@ export default function LoginPage() {
             <span className="text-brand-secondary">Chronicles</span>
           </h1>
           <p className="text-base leading-relaxed text-muted-text font-serif italic mt-2">
-            "Your warmest gateway to hand-painted anime reviews, breaking announcements, and seasonal catalog updates. Explore the stories that shape our worlds."
+            &quot;Your warmest gateway to hand-painted anime reviews, breaking announcements, and seasonal catalog updates. Explore the stories that shape our worlds.&quot;
           </p>
 
           <div className="w-full mt-12 border-t border-dashed border-image-frame pt-8">
@@ -46,7 +47,7 @@ export default function LoginPage() {
             <ul className="relative pl-6 border-l border-dashed border-timeline-rule space-y-8">
               
               <li className="relative">
-                <span className="absolute -left-[7px] top-1.5 h-3.5 w-3.5 rounded-full bg-brand-secondary border-2 border-[#fcf9f2] shadow-sm animate-pulse"></span>
+                <span className="absolute -left-1.75 top-1.5 h-3.5 w-3.5 rounded-full bg-brand-secondary border-2 border-[#fcf9f2] shadow-sm animate-pulse"></span>
                 <div className="flex flex-col gap-1.5">
                   <div className="flex items-center gap-3">
                     <span className="font-mono text-[10px] uppercase tracking-[1.1px] text-muted-gray">Summer Afternoon</span>
@@ -59,7 +60,7 @@ export default function LoginPage() {
               </li>
 
               <li className="relative">
-                <span className="absolute -left-[7px] top-1.5 h-3.5 w-3.5 rounded-full bg-brand-primary border-2 border-[#fcf9f2] shadow-sm"></span>
+                <span className="absolute -left-1.75 top-1.5 h-3.5 w-3.5 rounded-full bg-brand-primary border-2 border-[#fcf9f2] shadow-sm"></span>
                 <div className="flex flex-col gap-1.5">
                   <div className="flex items-center gap-3">
                     <span className="font-mono text-[10px] uppercase tracking-[1.1px] text-muted-gray">Morning Breeze</span>
@@ -83,7 +84,7 @@ export default function LoginPage() {
         </div>
       </div>
 
-      <div className="w-full lg:w-[40%] flex flex-col justify-between p-6 md:p-8 lg:p-10 bg-gradient-to-tr from-[#fdfbf7] via-[#fbf7ee] to-[#f8f1df] lg:h-screen lg:overflow-y-auto">
+      <div className="w-full lg:w-[40%] flex flex-col justify-between p-6 md:p-8 lg:p-10 bg-linear-to-tr from-canvas-background via-[#fbf7ee] to-[#f8f1df] lg:h-screen lg:overflow-y-auto">
         
         <div className="lg:hidden flex items-center justify-between mb-8">
           <h2 className="font-serif font-bold italic tracking-wide text-2xl text-charcoal-ink">
@@ -101,9 +102,11 @@ export default function LoginPage() {
           <div className="bg-surface-slate p-6 md:p-8 rounded-4xl border border-brand-primary-border shadow-md shadow-amber-900/2 relative">
             <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-20 h-20 z-20">
               <div className="absolute inset-0 bg-amber-500/5 rounded-full blur-md animate-pulse max-w-20 mx-auto"></div>
-              <img 
+              <Image 
                 src="/kage-chan.svg" 
                 alt="Kage-chan Mascot" 
+                width={80}
+                height={80}
                 className="w-20 h-20 drop-shadow-md select-none pointer-events-none" 
               />
             </div>
@@ -131,7 +134,7 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="wanderer@forest.com"
-                  className="w-full bg-canvas-background border border-brand-primary-border rounded-2xl px-4 py-2.5 text-sm font-sans text-charcoal-ink placeholder-[#b1a998] focus:outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 focus:shadow-md focus:shadow-amber-900/[0.03] transition-all duration-200"
+                  className="w-full bg-canvas-background border border-brand-primary-border rounded-2xl px-4 py-2.5 text-sm font-sans text-charcoal-ink placeholder-[#b1a998] focus:outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 focus:shadow-md focus:shadow-amber-900/3 transition-all duration-200"
                 />
               </div>
 
@@ -154,7 +157,7 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••••••"
-                  className="w-full bg-canvas-background border border-brand-primary-border rounded-2xl px-4 py-2.5 text-sm font-sans text-charcoal-ink placeholder-[#b1a998] focus:outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 focus:shadow-md focus:shadow-amber-900/[0.03] transition-all duration-200"
+                  className="w-full bg-canvas-background border border-brand-primary-border rounded-2xl px-4 py-2.5 text-sm font-sans text-charcoal-ink placeholder-[#b1a998] focus:outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 focus:shadow-md focus:shadow-amber-900/3 transition-all duration-200"
                 />
               </div>
 
@@ -166,7 +169,7 @@ export default function LoginPage() {
                     onChange={(e) => setRememberMe(e.target.checked)}
                     className="sr-only"
                   />
-                  <span className={`h-[18px] w-[18px] rounded-lg border transition-all duration-150 flex items-center justify-center ${rememberMe ? "border-brand-secondary bg-brand-secondary" : "border-brand-primary-border bg-canvas-background group-hover:border-brand-secondary"}`}>
+                  <span className={`h-4.5 w-4.5 rounded-lg border transition-all duration-150 flex items-center justify-center ${rememberMe ? "border-brand-secondary bg-brand-secondary" : "border-brand-primary-border bg-canvas-background group-hover:border-brand-secondary"}`}>
                     {rememberMe && (
                       <svg className="h-3 w-3 text-white stroke-[3.5px]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
@@ -190,15 +193,15 @@ export default function LoginPage() {
               </button>
 
               <div className="relative flex py-1 items-center">
-                <div className="flex-grow border-t border-dashed border-brand-primary-border/30"></div>
-                <span className="flex-shrink mx-4 font-serif text-[10px] text-muted-gray italic">or wander with</span>
-                <div className="flex-grow border-t border-dashed border-brand-primary-border/30"></div>
+                <div className="grow border-t border-dashed border-brand-primary-border/30"></div>
+                <span className="shrink mx-4 font-serif text-[10px] text-muted-gray italic">or wander with</span>
+                <div className="grow border-t border-dashed border-brand-primary-border/30"></div>
               </div>
 
               <button
                 type="button"
                 onClick={handleGoogleLogin}
-                className="w-full bg-canvas-background hover:bg-[#faf4e5] border border-brand-primary-border text-charcoal-ink font-mono text-[11px] font-bold uppercase tracking-[1.5px] py-3 px-6 rounded-full transition-all duration-300 flex items-center justify-center gap-3 cursor-pointer hover:scale-[1.02] active:scale-[0.98] shadow-sm shadow-amber-900/[0.02]"
+                className="w-full bg-canvas-background hover:bg-[#faf4e5] border border-brand-primary-border text-charcoal-ink font-mono text-[11px] font-bold uppercase tracking-[1.5px] py-3 px-6 rounded-full transition-all duration-300 flex items-center justify-center gap-3 cursor-pointer hover:scale-[1.02] active:scale-[0.98] shadow-sm shadow-amber-900/2"
               >
                 <svg className="h-4.5 w-4.5" viewBox="0 0 24 24">
                   <path
