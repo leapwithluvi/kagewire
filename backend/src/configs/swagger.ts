@@ -4,11 +4,11 @@ const options: swaggerJsdoc.Options = {
     definition: {
         openapi: "3.0.0",
         info: {
-            title: "🌟 KageWire API Documentation",
+            title: "🌟 KageWire Chronicles API Documentation",
             version: "1.0.0",
-            description: "Enterprise-grade API service for KageWire, an advanced anime tracking, discovery, and news platform.",
+            description: "Enterprise-grade API service for KageWire Chronicles, an advanced anime tracking, discovery, and news platform.",
             contact: {
-                name: "KageWire Development Team",
+                name: "KageWire Chronicles Development Team",
                 url: "https://github.com/leapwithluvi/kagewire",
             },
         },

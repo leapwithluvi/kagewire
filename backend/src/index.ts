@@ -33,9 +33,9 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.get("/", (_req, res) => {
     res.json({
         status: "success",
-        message: "Welcome to KageWire API Gateway",
+        message: "Welcome to KageWire Chronicles API Gateway",
         system: {
-            name: "KageWire Core API",
+            name: "KageWire Chronicles Core API",
             version: "1.0.0",
             description: "Advanced Anime Tracking, Discovery, and News API Service.",
             environment: process.env.NODE_ENV,
@@ -63,7 +63,7 @@ app.get("/api/v1/health", (_req, res) => {
         status: "success",
         message: "API Server is running",
         system: {
-            name: "KageWire Core API",
+            name: "KageWire Chronicles Core API",
             version: "1.0.0",
             environment: process.env.NODE_ENV,
             timestamp: new Date().toISOString()

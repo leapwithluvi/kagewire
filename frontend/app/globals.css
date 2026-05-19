@@ -1,0 +1,32 @@
+@import "tailwindcss";
+
+@theme {
+  /* 🎨 KAGEWIRE GHIBLI ART THEME (Watercolor, Cozy & Organic) */
+  --color-brand-primary: #3fa9e5;          /* Summer Sky Blue (Main action elements) */
+  --color-brand-secondary: #4a9c68;        /* Meadow Forest Green (Organic highlights) */
+  --color-brand-primary-border: #cfa375;   /* Oak Wood / Clay Outline (Cozy outline) */
+  --color-link-hover: #3860be;             /* Deep Link Blue (Hover) */
+  --color-timeline-rule: #a1cca5;          /* Soft Ivy Green Timeline rule */
+  --color-focus-cyan: #59b2e3;             /* Warm Sky Blue Focus ring */
+  
+  /* Ghibli Surface System */
+  --color-canvas-background: #fdfbf7;      /* Warm Antique Cream (Watercolor paper canvas) */
+  --color-surface-slate: #f3eee3;          /* Weathered Parchment Card background */
+  --color-image-frame: #dfd8ca;            /* Soft hand-drawn outline for images */
+  
+  /* Text & Neutrals */
+  --color-charcoal-ink: #2d3532;           /* Deep soft charcoal pencil sketch ink */
+  --color-white: #ffffff;
+  --color-black: #000000;
+  --color-muted-gray: #7a8580;             /* Soft mossy gray for secondary text */
+  --color-muted-text: #4a5350;             /* Soft charcoal deck reading text */
+}
+
+/* Base Body Style */
+body {
+  background-color: var(--color-canvas-background);
+  color: var(--color-charcoal-ink);
+  font-family: Georgia, Cambria, "Times New Roman", Times, serif; /* Nostalgic Ghibli editorial serif feel */
+  margin: 0;
+  overflow-x: hidden;
+}
