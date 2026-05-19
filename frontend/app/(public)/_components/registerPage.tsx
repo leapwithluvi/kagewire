@@ -15,13 +15,18 @@ export default function RegisterPage() {
       alert("Passcodes do not match!");
       return;
     }
-    console.log("Creating KageWire account for:", { username, email, password, agreeTerms });
+    // Secure Logging: Never print raw passwords to the client console to prevent credential leakage.
+    console.log("Creating KageWire account for:", { username, email, agreeTerms });
+  };
+
+  const handleGoogleLogin = () => {
+    console.log("Initiating Google sign-up flow for Ghibli chronicles...");
   };
 
   return (
     <div className="min-h-screen w-full bg-canvas-background text-charcoal-ink font-serif flex items-stretch select-none overflow-x-hidden">
       
-      <div className="hidden lg:flex lg:w-[60%] bg-[#fcf9f2] border-r border-image-frame flex-col justify-between p-16 relative overflow-hidden">
+      <div className="hidden lg:flex lg:w-[60%] bg-gradient-to-br from-[#fcf9f2] via-[#faf4e8] to-[#f4ecd8] border-r border-image-frame flex-col justify-between p-16 relative overflow-hidden">
         
         <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-brand-primary/10 blur-3xl pointer-events-none"></div>
         <div className="absolute -bottom-32 -right-32 w-100 h-100 rounded-full bg-brand-secondary/5 blur-3xl pointer-events-none"></div>
@@ -47,7 +52,7 @@ export default function RegisterPage() {
             <ul className="relative pl-6 border-l border-dashed border-timeline-rule space-y-8">
               
               <li className="relative">
-                <span className="absolute -left-7.5 top-1.5 h-3.5 w-3.5 rounded-full bg-brand-secondary border-2 border-[#fcf9f2]"></span>
+                <span className="absolute -left-[7px] top-1.5 h-3.5 w-3.5 rounded-full bg-brand-secondary border-2 border-[#fcf9f2] shadow-sm animate-pulse"></span>
                 <div className="flex flex-col gap-1.5">
                   <div className="flex items-center gap-3">
                     <span className="font-mono text-[10px] uppercase tracking-[1.1px] text-muted-gray">Summer Afternoon</span>
@@ -60,7 +65,7 @@ export default function RegisterPage() {
               </li>
 
               <li className="relative">
-                <span className="absolute -left-7.5 top-1.5 h-3.5 w-3.5 rounded-full bg-brand-primary border-2 border-[#fcf9f2]"></span>
+                <span className="absolute -left-[7px] top-1.5 h-3.5 w-3.5 rounded-full bg-brand-primary border-2 border-[#fcf9f2] shadow-sm"></span>
                 <div className="flex flex-col gap-1.5">
                   <div className="flex items-center gap-3">
                     <span className="font-mono text-[10px] uppercase tracking-[1.1px] text-muted-gray">Morning Breeze</span>
@@ -84,7 +89,7 @@ export default function RegisterPage() {
         </div>
       </div>
 
-      <div className="w-full lg:w-[40%] flex flex-col justify-between p-8 md:p-12 bg-canvas-background overflow-y-auto">
+      <div className="w-full lg:w-[40%] flex flex-col justify-between p-6 md:p-8 lg:p-10 bg-gradient-to-tr from-[#fdfbf7] via-[#fbf7ee] to-[#f8f1df] lg:h-screen lg:overflow-y-auto">
         
         <div className="lg:hidden flex items-center justify-between mb-8">
           <h2 className="font-serif font-bold italic tracking-wide text-2xl text-charcoal-ink">
@@ -99,17 +104,17 @@ export default function RegisterPage() {
 
         <div className="my-auto w-full max-w-md mx-auto pt-10 pb-6">
           
-          <div className="bg-surface-slate p-8 md:p-10 rounded-4xl border border-brand-primary-border shadow-md shadow-amber-900/2 relative">
-            <div className="absolute -top-12 left-1/2 -translate-x-1/2 w-24 h-24 z-20">
-              <div className="absolute inset-0 bg-amber-500/5 rounded-full blur-lg animate-pulse max-w-24 mx-auto"></div>
+          <div className="bg-surface-slate p-6 md:p-8 rounded-4xl border border-brand-primary-border shadow-md shadow-amber-900/2 relative">
+            <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-20 h-20 z-20">
+              <div className="absolute inset-0 bg-amber-500/5 rounded-full blur-md animate-pulse max-w-20 mx-auto"></div>
               <img 
                 src="/kage-chan.svg" 
                 alt="Kage-chan Mascot" 
-                className="w-24 h-24 drop-shadow-md select-none pointer-events-none" 
+                className="w-20 h-20 drop-shadow-md select-none pointer-events-none" 
               />
             </div>
 
-            <div className="flex flex-col gap-2 mb-6 mt-2">
+            <div className="flex flex-col gap-1.5 mb-5 mt-2">
               <span className="font-mono text-xs uppercase tracking-[1.9px] text-brand-secondary font-bold">
                 JOIN THE CHRONICLES
               </span>
@@ -121,22 +126,24 @@ export default function RegisterPage() {
               </p>
             </div>
 
-            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-              <div className="flex flex-col gap-1.5">
+            <form onSubmit={handleSubmit} className="flex flex-col gap-3.5">
+              <div className="flex flex-col gap-1">
                 <label className="font-mono text-[11px] uppercase tracking-[1.5px] text-charcoal-ink font-semibold">
                   WANDERER DISPLAY NAME
                 </label>
                 <input
                   type="text"
                   required
+                  pattern="^[a-zA-Z0-9_ ]{3,20}$"
+                  title="Display name must be 3-20 characters, containing only letters, numbers, spaces or underscores."
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   placeholder="Totoro"
-                  className="w-full bg-canvas-background border border-brand-primary-border rounded-2xl px-4 py-2.5 text-sm font-serif text-charcoal-ink placeholder-[#b1a998] focus:outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 transition-all duration-150"
+                  className="w-full bg-canvas-background border border-brand-primary-border rounded-2xl px-4 py-2.5 text-sm font-sans text-charcoal-ink placeholder-[#b1a998] focus:outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 focus:shadow-md focus:shadow-amber-900/[0.03] transition-all duration-200"
                 />
               </div>
 
-              <div className="flex flex-col gap-1.5">
+              <div className="flex flex-col gap-1">
                 <label className="font-mono text-[11px] uppercase tracking-[1.5px] text-charcoal-ink font-semibold">
                   EMAIL ADDRESS
                 </label>
@@ -146,39 +153,41 @@ export default function RegisterPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="wanderer@forest.com"
-                  className="w-full bg-canvas-background border border-brand-primary-border rounded-2xl px-4 py-2.5 text-sm font-serif text-charcoal-ink placeholder-[#b1a998] focus:outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 transition-all duration-150"
+                  className="w-full bg-canvas-background border border-brand-primary-border rounded-2xl px-4 py-2.5 text-sm font-sans text-charcoal-ink placeholder-[#b1a998] focus:outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 focus:shadow-md focus:shadow-amber-900/[0.03] transition-all duration-200"
                 />
               </div>
 
-              <div className="flex flex-col gap-1.5">
+              <div className="flex flex-col gap-1">
                 <label className="font-mono text-[11px] uppercase tracking-[1.5px] text-charcoal-ink font-semibold">
                   CREATE PASSCODE
                 </label>
                 <input
                   type="password"
                   required
+                  minLength={8}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••••••"
-                  className="w-full bg-canvas-background border border-brand-primary-border rounded-2xl px-4 py-2.5 text-sm font-serif text-charcoal-ink placeholder-[#b1a998] focus:outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 transition-all duration-150"
+                  className="w-full bg-canvas-background border border-brand-primary-border rounded-2xl px-4 py-2.5 text-sm font-sans text-charcoal-ink placeholder-[#b1a998] focus:outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 focus:shadow-md focus:shadow-amber-900/[0.03] transition-all duration-200"
                 />
               </div>
 
-              <div className="flex flex-col gap-1.5">
+              <div className="flex flex-col gap-1">
                 <label className="font-mono text-[11px] uppercase tracking-[1.5px] text-charcoal-ink font-semibold">
                   CONFIRM PASSCODE
                 </label>
                 <input
                   type="password"
                   required
+                  minLength={8}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="••••••••••••"
-                  className="w-full bg-canvas-background border border-brand-primary-border rounded-2xl px-4 py-2.5 text-sm font-serif text-charcoal-ink placeholder-[#b1a998] focus:outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 transition-all duration-150"
+                  className="w-full bg-canvas-background border border-brand-primary-border rounded-2xl px-4 py-2.5 text-sm font-sans text-charcoal-ink placeholder-[#b1a998] focus:outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 focus:shadow-md focus:shadow-amber-900/[0.03] transition-all duration-200"
                 />
               </div>
 
-              <div className="flex items-center justify-between mt-1">
+              <div className="flex items-center justify-between mt-0.5">
                 <label className="flex items-center gap-3 cursor-pointer group">
                   <input
                     type="checkbox"
@@ -187,7 +196,7 @@ export default function RegisterPage() {
                     required
                     className="sr-only"
                   />
-                  <span className={`h-4.5 w-4.5 rounded-lg border transition-all duration-150 flex items-center justify-center ${agreeTerms ? "border-brand-secondary bg-brand-secondary" : "border-brand-primary-border bg-canvas-background group-hover:border-brand-secondary"}`}>
+                  <span className={`h-[18px] w-[18px] rounded-lg border transition-all duration-150 flex items-center justify-center ${agreeTerms ? "border-brand-secondary bg-brand-secondary" : "border-brand-primary-border bg-canvas-background group-hover:border-brand-secondary"}`}>
                     {agreeTerms && (
                       <svg className="h-3 w-3 text-white stroke-[3.5px]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
@@ -202,12 +211,44 @@ export default function RegisterPage() {
 
               <button
                 type="submit"
-                className="w-full mt-3 bg-brand-primary text-white font-mono text-xs font-bold uppercase tracking-[1.5px] py-3.5 px-6 rounded-full hover:bg-brand-secondary border border-transparent transition-all duration-180 flex items-center justify-center gap-2 cursor-pointer shadow-sm shadow-brand-primary/20"
+                className="w-full mt-2 bg-brand-primary text-white font-mono text-xs font-bold uppercase tracking-[1.5px] py-3.5 px-6 rounded-full hover:bg-brand-secondary hover:scale-[1.02] active:scale-[0.98] border border-transparent transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer shadow-md shadow-brand-primary/20"
               >
                 CREATE ACCOUNT
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
                 </svg>
+              </button>
+
+              <div className="relative flex py-1 items-center">
+                <div className="flex-grow border-t border-dashed border-brand-primary-border/30"></div>
+                <span className="flex-shrink mx-4 font-serif text-[10px] text-muted-gray italic">or wander with</span>
+                <div className="flex-grow border-t border-dashed border-brand-primary-border/30"></div>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleGoogleLogin}
+                className="w-full bg-canvas-background hover:bg-[#faf4e5] border border-brand-primary-border text-charcoal-ink font-mono text-[11px] font-bold uppercase tracking-[1.5px] py-3 px-6 rounded-full transition-all duration-300 flex items-center justify-center gap-3 cursor-pointer hover:scale-[1.02] active:scale-[0.98] shadow-sm shadow-amber-900/[0.02]"
+              >
+                <svg className="h-4.5 w-4.5" viewBox="0 0 24 24">
+                  <path
+                    fill="#EA4335"
+                    d="M5.266 9.765A7.077 7.077 0 0112 4.909c1.69 0 3.218.6 4.418 1.582L19.91 3C17.782 1.145 15.055 0 12 0 7.33 0 3.266 2.682 1.173 6.627l4.093 3.138z"
+                  />
+                  <path
+                    fill="#FBBC05"
+                    d="M1.173 6.627L5.266 9.765a7.077 7.077 0 010 4.47l-4.093 3.138A11.968 11.968 0 010 12c0-1.927.427-3.755 1.173-5.373z"
+                  />
+                  <path
+                    fill="#4285F4"
+                    d="M12 24c3.245 0 5.973-1.082 7.964-2.945l-3.909-3.027c-1.118.755-2.545 1.209-4.055 1.209-3.118 0-5.755-2.109-6.7-4.945L1.209 17.427A11.972 11.972 0 0012 24z"
+                  />
+                  <path
+                    fill="#34A853"
+                    d="M24 12c0-.855-.082-1.682-.227-2.482H12v4.709h6.736A5.768 5.768 0 0116.2 18.027l3.909 3.027C22.4 19.145 24 15.827 24 12z"
+                  />
+                </svg>
+                CONTINUE WITH GOOGLE
               </button>
             </form>
           </div>
