@@ -1,4 +1,12 @@
 <div align="center">
+  <a href="https://github.com/leapwithluvi/kagewire/stargazers"><img src="https://img.shields.io/github/stars/leapwithluvi/kagewire?style=social" alt="Stars" /></a>
+  <a href="https://github.com/leapwithluvi/kagewire/network/members"><img src="https://img.shields.io/github/forks/leapwithluvi/kagewire?style=social" alt="Fork" /></a>
+  <a href="https://github.com/leapwithluvi/kagewire/pulls"><img src="https://img.shields.io/github/issues-pr/leapwithluvi/kagewire?style=social&logo=github" alt="Pull requests" /></a>
+</div>
+
+<br/>
+
+<div align="center">
   <a href="https://github.com/leapwithluvi/kagewire">
     <img width="1500" alt="KageWire Chronicles Banner" src="frontend/public/kagewire-banner.png" />
   </a>
@@ -23,8 +31,6 @@
   <a href="https://github.com/leapwithluvi/kagewire/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?color=dddddd&labelColor=000000" alt="License" /></a>
   <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/github/languages/top/leapwithluvi/kagewire?logo=github&logoColor=%23007ACC&label=TypeScript" alt="Top Language" /></a>
   <a href="https://github.com/leapwithluvi/kagewire/commits/main"><img src="https://img.shields.io/github/last-commit/leapwithluvi/kagewire?logo=git&logoColor=white&color=3fa9e5&labelColor=101827&label=Last%20Update" alt="Last Commit" /></a>
-  <a href="https://github.com/leapwithluvi/kagewire/stargazers"><img src="https://img.shields.io/github/stars/leapwithluvi/kagewire?logo=github&logoColor=white&color=ffb800&labelColor=101827&label=Stars" alt="Stars" /></a>
-  <a href="https://github.com/leapwithluvi/kagewire/network/members"><img src="https://img.shields.io/github/forks/leapwithluvi/kagewire?logo=github&logoColor=white&color=00bfff&labelColor=101827&label=Forks" alt="Forks" /></a>
   <img src="https://img.shields.io/badge/PRs-welcome-ff69b4.svg?style=shields" alt="PRs" />
   <img src="https://img.shields.io/badge/Status-Active-success" alt="Status" />
 </div>

@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="18 20 124 124" width="160" height="160" fill="none">
+  <style>
+    @keyframes blink {
+      0%, 90%, 100% {
+        transform: scaleY(1);
+      }
+      95% {
+        transform: scaleY(0.05);
+      }
+    }
+    @keyframes pulse {
+      0%, 100% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.02);
+      }
+    }
+    .sprite-body {
+      transform-origin: 80px 87px;
+      animation: pulse 3s infinite ease-in-out;
+    }
+    .eyes-group {
+      transform-origin: 80px 78px;
+      animation: blink 4s infinite ease-in-out;
+    }
+  </style>
+
+  <ellipse cx="80" cy="130" rx="45" ry="12" fill="#2d3532" fill-opacity="0.08" />
+  
+  <path 
+    d="M35 125 C 60 135, 100 135, 125 125 C 135 120, 140 110, 130 115 C 115 122, 75 125, 45 118 C 30 115, 25 120, 35 125 Z" 
+    fill="#4a9c68" 
+    fill-opacity="0.9" 
+  />
+  <path d="M45 120 Q 80 128 125 121" stroke="#377850" stroke-width="1.5" stroke-linecap="round" />
+  
+  <g class="sprite-body">
+    <path d="M42 100 Q 80 121 118 100 L 98 124 Q 80 128 62 124 Z" fill="#2d3532" />
+    
+    <circle cx="80" cy="87" r="44" fill="#2d3532" />
+    
+    <path d="M70 42 L80 32 L90 42 M55 52 L42 42 L52 58 M105 52 L118 42 L108 58 M43 85 L30 85 L43 95 M117 85 L130 85 L117 95 M50 115 L40 128 L58 118 M110 115 L120 128 L102 118" stroke="#2d3532" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M60 48 L50 36 L65 52 M100 48 L110 36 L95 52 M40 68 L26 64 L42 74 M120 68 L134 64 L118 74 M42 100 L28 106 L44 104 M118 100 L132 106 L116 104" stroke="#2d3532" stroke-width="5" stroke-linecap="round" />
+  </g>
+
+  <g class="eyes-group">
+    <circle cx="64" cy="78" r="16" fill="white" />
+    <circle cx="66" cy="78" r="6" fill="#2d3532" />
+    <circle cx="70" cy="74" r="2.5" fill="white" />
+    
+    <circle cx="96" cy="78" r="16" fill="white" />
+    <circle cx="94" cy="78" r="6" fill="#2d3532" />
+    <circle cx="98" cy="74" r="2.5" fill="white" />
+  </g>
+
+  <path d="M72 45 C 72 40, 88 40, 88 45 C 88 50, 72 50, 72 45 Z" fill="#4a9c68" />
+  <path d="M80 43 L80 36" stroke="#377850" stroke-width="2" stroke-linecap="round" />
+</svg>
