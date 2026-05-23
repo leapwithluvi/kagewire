@@ -6,10 +6,15 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test-api": "node ../scratch/test_api.js",
+    "test-parser": "node ../scratch/test_parser.js"
   },
   "dependencies": {
+    "axios": "^1.16.1",
+    "fast-xml-parser": "^5.8.0",
     "next": "^16.2.6",
+    "next-themes": "^0.4.6",
     "react": "^19.2.6",
     "react-dom": "^19.2.6"
   },

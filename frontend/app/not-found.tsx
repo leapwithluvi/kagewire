@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 
 export default function NotFound() {
   return (
@@ -23,7 +24,7 @@ export default function NotFound() {
           </div>
           <div className="absolute top-6 right-6 animate-[bounce_4.5s_infinite_ease-in-out_delay-800]">
             <svg className="w-4 h-4" viewBox="0 0 24 24">
-              <path d="M12 2 L14 8 L20 6 L17 12 L22 15 L15 16 L16 22 L12 18 L8 22 L9 16 L2 15 L7 12 L4 6 L10 8 Z" fill="#bae1ff" />
+              <path d="M12 2 L14 8 L20 6 L17 12 L22 15 L15 16 L16 22 L12 18 L8 22 L9 16 L2 15 L7 12 L4 6 L10 8 Z" fill="#bcf4d4" />
             </svg>
           </div>
           <div className="absolute bottom-6 left-4 animate-[bounce_3.8s_infinite_ease-in-out_delay-500]">
@@ -34,7 +35,7 @@ export default function NotFound() {
         </div>
 
         <div className="flex flex-col gap-2">
-          <span className="font-mono text-xs uppercase tracking-[2.5px] text-brand-secondary font-bold">
+          <span className="font-mono text-xs uppercase tracking-[2.5px] text-brand-primary font-bold">
             CHRONICLE OFFSET 404
           </span>
           <h2 className="font-serif italic font-bold text-4xl text-charcoal-ink tracking-wide leading-none mt-1">
@@ -47,22 +48,22 @@ export default function NotFound() {
 
         <div className="flex flex-col sm:flex-row gap-3 w-full mt-4 justify-center">
           
-          <a
+          <Link
             href="/"
-            className="bg-brand-primary text-white font-mono text-xs font-bold uppercase tracking-[1.5px] py-4 px-8 rounded-full hover:bg-brand-secondary transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer shadow-sm shadow-brand-primary/20 hover:shadow-brand-secondary/20"
+            className="bg-brand-primary text-white font-mono text-xs font-bold uppercase tracking-[1.5px] py-4 px-8 rounded-full hover:bg-brand-primary/95 transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer shadow-sm shadow-brand-primary/20 hover:shadow-brand-primary/30"
           >
             <svg className="h-4 w-4 stroke-[2.5px]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
             Follow Forest Path
-          </a>
+          </Link>
 
-          <a
+          <Link
             href="/auth/login"
             className="bg-surface-slate text-charcoal-ink border border-brand-primary-border font-mono text-xs font-semibold uppercase tracking-[1.2px] py-4 px-8 rounded-full hover:bg-brand-primary hover:text-white hover:border-transparent transition-all duration-200 flex items-center justify-center cursor-pointer"
           >
             Enter Portal
-          </a>
+          </Link>
         </div>
 
       </div>
@@ -70,11 +71,7 @@ export default function NotFound() {
       <div className="mt-8 text-center text-muted-gray font-mono text-[9px] uppercase tracking-[1.5px] z-10">
         KageWire Chronicles • Hand-painted with Cozy Nostalgia
       </div>
-      <style jsx global>{`
-        .rounded-4xl {
-          border-radius: 32px;
-        }
-      `}</style>
+
 
     </div>
   );

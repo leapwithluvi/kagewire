@@ -1,32 +1,102 @@
 @import "tailwindcss";
 
 @theme {
-  /* 🎨 KAGEWIRE GHIBLI ART THEME (Watercolor, Cozy & Organic) */
-  --color-brand-primary: #3fa9e5;          /* Summer Sky Blue (Main action elements) */
-  --color-brand-secondary: #4a9c68;        /* Meadow Forest Green (Organic highlights) */
-  --color-brand-primary-border: #cfa375;   /* Oak Wood / Clay Outline (Cozy outline) */
-  --color-link-hover: #3860be;             /* Deep Link Blue (Hover) */
-  --color-timeline-rule: #a1cca5;          /* Soft Ivy Green Timeline rule */
-  --color-focus-cyan: #59b2e3;             /* Warm Sky Blue Focus ring */
+  /* Menerapkan CSS Variables agar dapat berubah otomatis saat Dark Mode */
+  --color-brand-primary: var(--brand-primary);
+  --color-brand-secondary: var(--brand-secondary);
+  --color-brand-primary-border: var(--brand-primary-border);
+  --color-link-hover: var(--link-hover);
+  --color-timeline-rule: var(--timeline-rule);
+  --color-focus-cyan: var(--focus-cyan);
   
-  /* Ghibli Surface System */
-  --color-canvas-background: #fdfbf7;      /* Warm Antique Cream (Watercolor paper canvas) */
-  --color-surface-slate: #f3eee3;          /* Weathered Parchment Card background */
-  --color-image-frame: #dfd8ca;            /* Soft hand-drawn outline for images */
+  --color-canvas-background: var(--canvas-background);
+  --color-surface-slate: var(--surface-slate);
+  --color-image-frame: var(--image-frame);
   
-  /* Text & Neutrals */
-  --color-charcoal-ink: #2d3532;           /* Deep soft charcoal pencil sketch ink */
+  --color-charcoal-ink: var(--charcoal-ink);
   --color-white: #ffffff;
   --color-black: #000000;
-  --color-muted-gray: #7a8580;             /* Soft mossy gray for secondary text */
-  --color-muted-text: #4a5350;             /* Soft charcoal deck reading text */
+  --color-muted-gray: var(--muted-gray);
+  --color-muted-text: var(--muted-text);
+
+  --radius-4xl: 32px;
 }
 
-/* Base Body Style */
+:root, html[data-theme='light'] {
+  /* 🌿 LIGHT MODE - Ghibli Forest Theme (Alam, Hijau, Organik) */
+  --brand-primary: #4a9c68;        /* Meadow Forest Green — warna dominan Ghibli */
+  --brand-secondary: #3fa9e5;      /* Summer Sky Blue — aksen langit */
+  --brand-primary-border: #cfa375; /* Oak Wood / Clay Outline */
+  --link-hover: #2d7a4f;           /* Deep Forest Green hover */
+  --timeline-rule: #a1cca5;        /* Soft Ivy Green */
+  --focus-cyan: #4a9c68;
+  
+  --canvas-background: #fdfbf7;    /* Warm Antique Cream */
+  --surface-slate: #f3eee3;        /* Weathered Parchment */
+  --image-frame: #dfd8ca;
+  
+  --charcoal-ink: #2d3532;         /* Deep charcoal pencil ink */
+  --muted-gray: #7a8580;           /* Soft mossy gray */
+  --muted-text: #4a5350;
+}
+
+.dark, html[data-theme='dark'] {
+  /* 🌙 DARK MODE - Ghibli Midnight Forest */
+  --brand-primary: #5dc383;        /* Lighter Meadow Green untuk visibility */
+  --brand-secondary: #59b2e3;      /* Sky Blue accent */
+  --brand-primary-border: #3b4541;
+  --link-hover: #7ddb9f;
+  --timeline-rule: #3b4541;
+  --focus-cyan: #5dc383;
+  
+  --canvas-background: #141816;    /* Deep midnight forest */
+  --surface-slate: #1e2522;
+  --image-frame: #2d3532;
+  
+  --charcoal-ink: #fdfbf7;
+  --muted-gray: #a0ada7;
+  --muted-text: #c0ccc6;
+}
+
+/* Base Body Style & Organic Ghibli Paper Texture */
 body {
-  background-color: var(--color-canvas-background);
-  color: var(--color-charcoal-ink);
-  font-family: Georgia, Cambria, "Times New Roman", Times, serif; /* Nostalgic Ghibli editorial serif feel */
+  background-color: var(--canvas-background);
+  color: var(--charcoal-ink);
+  font-family: Georgia, Cambria, "Times New Roman", Times, serif;
   margin: 0;
   overflow-x: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  position: relative;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  opacity: 0.018; /* Tekstur kertas watercolor yang sangat halus */
+  pointer-events: none;
+  z-index: 9999;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+html[data-theme='dark'] body::before,
+.dark body::before {
+  opacity: 0.006; /* Dikurangi di dark mode agar tetap sejuk di mata */
+}
+
+/* ===== BREAKING NEWS TICKER ANIMATION ===== */
+@keyframes ticker {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.ticker-track {
+  animation: ticker 40s linear infinite;
+  will-change: transform;
+}
+
+.ticker-track:hover {
+  animation-play-state: paused;
 }

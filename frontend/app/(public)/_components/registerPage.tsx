@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 
 export default function RegisterPage() {
   const [username, setUsername] = useState("");
@@ -16,7 +17,6 @@ export default function RegisterPage() {
       alert("Passcodes do not match!");
       return;
     }
-    // Secure Logging: Never print raw passwords to the client console to prevent credential leakage.
     console.log("Creating KageWire account for:", { username, email, agreeTerms });
   };
 
@@ -25,35 +25,47 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-canvas-background text-charcoal-ink font-serif flex items-stretch select-none overflow-x-hidden">
+    <div className="min-h-screen w-full bg-canvas-background text-charcoal-ink font-serif flex items-stretch select-none overflow-x-hidden relative">
       
-      <div className="hidden lg:flex lg:w-[60%] bg-linear-to-br from-[#fcf9f2] via-[#faf4e8] to-[#f4ecd8] border-r border-image-frame flex-col justify-between p-16 relative overflow-hidden">
+      {/* Back Button to Hero Page */}
+      <Link 
+        href="/" 
+        className="absolute top-6 left-6 lg:top-10 lg:left-10 z-50 flex items-center justify-center sm:justify-start gap-2 h-10 px-3.5 sm:px-4 sm:py-2 rounded-full border border-brand-primary-border bg-surface-slate hover:bg-brand-primary hover:text-white transition-all duration-200 shadow-sm text-charcoal-ink font-mono text-[10px] lg:text-xs uppercase tracking-wider"
+        title="Back to home"
+      >
+        <svg className="h-4.5 w-4.5 stroke-[2.5px] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        <span className="hidden sm:inline">Back to home</span>
+      </Link>
+
+      <div className="hidden lg:flex lg:w-[60%] bg-surface-slate border-r border-image-frame flex-col justify-between p-16 relative overflow-hidden">
         
         <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-brand-primary/10 blur-3xl pointer-events-none"></div>
-        <div className="absolute -bottom-32 -right-32 w-100 h-100 rounded-full bg-brand-secondary/5 blur-3xl pointer-events-none"></div>
+        <div className="absolute -bottom-32 -right-32 w-100 h-100 rounded-full bg-brand-primary/5 blur-3xl pointer-events-none"></div>
 
         <div className="z-10 my-auto flex flex-col items-start gap-6 select-none max-w-xl">
-          <span className="font-mono text-sm uppercase tracking-[2px] font-semibold text-brand-secondary">
+          <span className="font-mono text-sm uppercase tracking-[2px] font-semibold text-brand-primary">
             COZY ANIME NEWS & EXPLORATION
           </span>
           <h1 className="font-serif italic font-bold tracking-wide text-5xl md:text-7xl leading-tight text-charcoal-ink">
             KageWire<span className="text-brand-primary font-normal">.</span>
             <br />
-            <span className="text-brand-secondary">Chronicles</span>
+            <span className="text-brand-primary">Chronicles</span>
           </h1>
           <p className="text-base leading-relaxed text-muted-text font-serif italic mt-2">
             &quot;Your warmest gateway to hand-painted anime reviews, breaking announcements, and seasonal catalog updates. Explore the stories that shape our worlds.&quot;
           </p>
 
           <div className="w-full mt-12 border-t border-dashed border-image-frame pt-8">
-            <span className="font-mono text-xs uppercase tracking-[1.8px] text-brand-secondary block mb-6 font-semibold">
+            <span className="font-mono text-xs uppercase tracking-[1.8px] text-brand-primary block mb-6 font-semibold">
               LATEST CHRONICLES & PRESS
             </span>
             
             <ul className="relative pl-6 border-l border-dashed border-timeline-rule space-y-8">
               
               <li className="relative">
-                <span className="absolute -left-1.75 top-1.5 h-3.5 w-3.5 rounded-full bg-brand-secondary border-2 border-[#fcf9f2] shadow-sm animate-pulse"></span>
+                <span className="absolute -left-1.75 top-1.5 h-3.5 w-3.5 rounded-full bg-brand-primary border-2 border-[#fcf9f2] shadow-sm animate-pulse"></span>
                 <div className="flex flex-col gap-1.5">
                   <div className="flex items-center gap-3">
                     <span className="font-mono text-[10px] uppercase tracking-[1.1px] text-muted-gray">Summer Afternoon</span>
@@ -70,7 +82,7 @@ export default function RegisterPage() {
                 <div className="flex flex-col gap-1.5">
                   <div className="flex items-center gap-3">
                     <span className="font-mono text-[10px] uppercase tracking-[1.1px] text-muted-gray">Morning Breeze</span>
-                    <span className="px-2 py-0.5 rounded-full bg-brand-secondary/10 text-brand-secondary font-mono text-[9px] font-bold uppercase tracking-[0.72px]">JOURNAL</span>
+                    <span className="px-2 py-0.5 rounded-full bg-brand-primary/10 text-brand-primary font-mono text-[9px] font-bold uppercase tracking-[0.72px]">JOURNAL</span>
                   </div>
                   <h4 className="font-serif font-bold text-base text-charcoal-ink hover:text-brand-primary transition-colors duration-150 cursor-pointer">
                     Tracking the Most Scenic Hand-Painted Backgrounds in Seasonal Anime
@@ -90,13 +102,13 @@ export default function RegisterPage() {
         </div>
       </div>
 
-      <div className="w-full lg:w-[40%] flex flex-col justify-between p-6 md:p-8 lg:p-10 bg-linear-to-tr from-canvas-background via-[#fbf7ee] to-[#f8f1df] lg:h-screen lg:overflow-y-auto">
+      <div className="w-full lg:w-[40%] flex flex-col justify-between p-6 md:p-8 lg:p-10 bg-canvas-background lg:h-screen lg:overflow-y-auto">
         
-        <div className="lg:hidden flex items-center justify-between mb-8">
-          <h2 className="font-serif font-bold italic tracking-wide text-2xl text-charcoal-ink">
+        <div className="lg:hidden flex items-center justify-between mb-8 pl-12">
+          <h2 className="font-serif font-bold italic tracking-wide text-xl text-charcoal-ink">
             KageWire<span className="text-brand-primary">.</span>
           </h2>
-          <span className="font-mono text-[10px] uppercase tracking-[1.8px] text-muted-gray">
+          <span className="font-mono text-[9px] uppercase tracking-[1.5px] text-muted-gray">
             DIARY REGISTRATION
           </span>
         </div>
@@ -118,7 +130,7 @@ export default function RegisterPage() {
             </div>
 
             <div className="flex flex-col gap-1.5 mb-5 mt-2">
-              <span className="font-mono text-xs uppercase tracking-[1.9px] text-brand-secondary font-bold">
+              <span className="font-mono text-xs uppercase tracking-[1.9px] text-brand-primary font-bold">
                 JOIN THE CHRONICLES
               </span>
               <h2 className="font-serif text-3xl font-bold tracking-wide text-charcoal-ink leading-none">
@@ -199,7 +211,7 @@ export default function RegisterPage() {
                     required
                     className="sr-only"
                   />
-                  <span className={`h-4.5 w-4.5 rounded-lg border transition-all duration-150 flex items-center justify-center ${agreeTerms ? "border-brand-secondary bg-brand-secondary" : "border-brand-primary-border bg-canvas-background group-hover:border-brand-secondary"}`}>
+                  <span className={`h-4.5 w-4.5 rounded-lg border transition-all duration-150 flex items-center justify-center ${agreeTerms ? "border-brand-primary bg-brand-primary" : "border-brand-primary-border bg-canvas-background group-hover:border-brand-primary"}`}>
                     {agreeTerms && (
                       <svg className="h-3 w-3 text-white stroke-[3.5px]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
@@ -214,7 +226,7 @@ export default function RegisterPage() {
 
               <button
                 type="submit"
-                className="w-full mt-2 bg-brand-primary text-white font-mono text-xs font-bold uppercase tracking-[1.5px] py-3.5 px-6 rounded-full hover:bg-brand-secondary hover:scale-[1.02] active:scale-[0.98] border border-transparent transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer shadow-md shadow-brand-primary/20"
+                className="w-full mt-2 bg-brand-primary text-white font-mono text-xs font-bold uppercase tracking-[1.5px] py-3.5 px-6 rounded-full hover:bg-brand-primary/95 hover:scale-[1.02] active:scale-[0.98] border border-transparent transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer shadow-md shadow-brand-primary/20"
               >
                 CREATE ACCOUNT
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -260,12 +272,12 @@ export default function RegisterPage() {
             <span className="font-serif text-xs text-muted-text italic">
               Already have a KageWire account?
             </span>
-            <a
+            <Link
               href="/auth/login"
               className="w-full bg-surface-slate text-charcoal-ink border border-brand-primary-border font-mono text-xs uppercase tracking-[1.2px] py-3 px-6 rounded-full hover:bg-brand-primary hover:text-white hover:border-transparent transition-all duration-180 flex items-center justify-center cursor-pointer"
             >
               SIGN IN TO PORTAL
-            </a>
+            </Link>
           </div>
         </div>
 
