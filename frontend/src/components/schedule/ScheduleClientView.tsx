@@ -1,0 +1,277 @@
+'use client';
+
+import React, { useState, useMemo } from 'react';
+import Link from 'next/link';
+import { ScheduleDay } from '@/types/api';
+import { AdBanner } from '@/components/ads/AdBanner';
+import {
+  Calendar,
+  Clock,
+  Film,
+  Search,
+  ChevronDown,
+  Sparkles,
+  Play,
+} from 'lucide-react';
+
+const DAYS = ['Semua', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
+
+interface ScheduleClientViewProps {
+  initialSchedule: ScheduleDay[];
+}
+
+export function ScheduleClientView({ initialSchedule }: ScheduleClientViewProps) {
+  // Determine today in WIB (Indonesian day name)
+  const todayName = useMemo(() => {
+    const daysMap = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+    const now = new Date();
+    const utc = now.getTime() + now.getTimezoneOffset() * 60000;
+    const wib = new Date(utc + 3600000 * 7);
+    return daysMap[wib.getDay()];
+  }, []);
+
+  const [selectedDay, setSelectedDay] = useState<string>(todayName);
+  const [filterType, setFilterType] = useState<'all' | 'anime' | 'donghua'>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filteredDays = useMemo(() => {
+    return initialSchedule
+      .filter((day) => selectedDay === 'Semua' || day.day.toLowerCase() === selectedDay.toLowerCase())
+      .map((day) => ({
+        ...day,
+        isToday: day.day.toLowerCase() === todayName.toLowerCase(),
+        entries: day.entries.filter((e) => {
+          const matchesType = filterType === 'all' || e.type === filterType;
+          const q = searchQuery.trim().toLowerCase();
+          const matchesQuery =
+            !q ||
+            e.title.toLowerCase().includes(q) ||
+            (e.genres && e.genres.some((g) => g.toLowerCase().includes(q)));
+          return matchesType && matchesQuery;
+        }),
+      }))
+      .filter((day) => day.entries.length > 0);
+  }, [initialSchedule, selectedDay, filterType, searchQuery, todayName]);
+
+  const totalShown = filteredDays.reduce((acc, d) => acc + d.entries.length, 0);
+
+  return (
+    <div className="min-h-screen bg-background text-content-primary pb-20 pt-8">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+
+        {/* Header */}
+        <div className="mb-8 text-center max-w-2xl mx-auto">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber/15 border border-amber/30 text-amber text-xs font-mono mb-3 shadow-sm">
+            <Calendar className="w-3.5 h-3.5" />
+            <span>Jadwal Tayang Anime &amp; Donghua Mingguan</span>
+          </div>
+          <h1 className="font-editorial text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-content-primary">
+            Jadwal Rilis Anime &amp; Donghua
+          </h1>
+          <p className="mt-3 text-sm sm:text-base text-content-secondary leading-relaxed">
+            Pantau jadwal tayang episode terbaru anime Jepang dan animasi donghua China setiap hari. Waktu penayangan disesuaikan dengan Waktu Indonesia Barat (WIB).
+          </p>
+        </div>
+
+        {/* Top Leaderboard Ad */}
+        <AdBanner slotId="schedule-leaderboard" className="mb-10" />
+
+        {/* Dropdown Filters Row */}
+        <div className="flex flex-col sm:flex-row items-stretch gap-3 mb-8 p-4 bg-surface-card rounded-xl border border-border-subtle shadow-sm">
+
+          {/* Day Dropdown */}
+          <div className="relative flex-1">
+            <label className="block text-[11px] font-mono uppercase tracking-wider text-content-muted mb-1">
+              Hari Tayang
+            </label>
+            <div className="relative">
+              <select
+                value={selectedDay}
+                onChange={(e) => setSelectedDay(e.target.value)}
+                className="w-full appearance-none pl-3.5 pr-9 py-2.5 rounded-lg bg-surface-main border border-border-subtle text-sm font-semibold text-content-primary focus:border-amber focus:outline-none cursor-pointer transition-colors hover:border-amber/40"
+              >
+                {DAYS.map((day) => (
+                  <option key={day} value={day}>
+                    {day === todayName ? `${day} (Hari Ini)` : day === 'Semua' ? 'Semua Hari' : `Hari ${day}`}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="w-4 h-4 text-amber absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            </div>
+          </div>
+
+          {/* Type Dropdown */}
+          <div className="relative flex-1 sm:max-w-[200px]">
+            <label className="block text-[11px] font-mono uppercase tracking-wider text-content-muted mb-1">
+              Tipe Konten
+            </label>
+            <div className="relative">
+              <select
+                value={filterType}
+                onChange={(e) => setFilterType(e.target.value as 'all' | 'anime' | 'donghua')}
+                className="w-full appearance-none pl-3.5 pr-9 py-2.5 rounded-lg bg-surface-main border border-border-subtle text-sm font-semibold text-content-primary focus:border-amber focus:outline-none cursor-pointer transition-colors hover:border-amber/40"
+              >
+                <option value="all">Semua Tipe</option>
+                <option value="anime">Anime (Jepang)</option>
+                <option value="donghua">Donghua (China)</option>
+              </select>
+              <ChevronDown className="w-4 h-4 text-amber absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            </div>
+          </div>
+
+          {/* Search Input */}
+          <div className="relative flex-1 sm:max-w-[280px]">
+            <label className="block text-[11px] font-mono uppercase tracking-wider text-content-muted mb-1">
+              Cari Judul
+            </label>
+            <div className="relative">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Judul / Genre..."
+                className="w-full pl-9 pr-3.5 py-2.5 rounded-lg bg-surface-main border border-border-subtle text-sm text-content-primary placeholder:text-content-muted focus:border-amber focus:outline-none transition-colors"
+              />
+              <Search className="w-4 h-4 text-content-muted absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            </div>
+          </div>
+
+          {/* Count Badge */}
+          <div className="flex sm:flex-col justify-between items-center sm:items-start shrink-0 px-4 py-2 rounded-lg bg-surface-secondary border border-border-subtle">
+            <span className="text-[11px] font-mono text-content-muted">Tampil</span>
+            <span className="text-sm font-bold text-amber font-mono">{totalShown} Judul</span>
+          </div>
+        </div>
+
+        {/* Schedule Grid */}
+        {filteredDays.length === 0 ? (
+          <div className="py-20 text-center text-content-muted text-sm rounded-xl border border-border-subtle bg-surface-card p-8">
+            <p className="font-semibold text-content-primary mb-1">Tidak ada jadwal yang cocok</p>
+            <p className="text-xs text-content-secondary">Coba pilih hari lain atau bersihkan kata kunci pencarian Anda.</p>
+          </div>
+        ) : (
+          <div className="space-y-10">
+            {filteredDays.map((day) => (
+              <div key={day.day} className="space-y-4">
+
+                {/* Day Divider Banner */}
+                <div className="flex items-center justify-between p-4 rounded-xl bg-surface-card border border-border-subtle shadow-sm">
+                  <div className="flex items-center gap-2.5">
+                    <h2 className="font-editorial text-xl sm:text-2xl font-bold text-content-primary">
+                      {day.day}
+                    </h2>
+                    <span className="text-xs font-mono text-content-muted">
+                      ({day.dayEn})
+                    </span>
+                    {day.isToday && (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber/20 text-amber border border-amber/40 shadow-sm">
+                        <Sparkles className="w-3 h-3" />
+                        Hari Ini
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-xs font-mono text-content-muted">
+                    {day.entries.length} Judul Tayang
+                  </span>
+                </div>
+
+                {/* Cards Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                  {day.entries.map((entry, idx) => {
+                    const detailHref =
+                      entry.type === 'donghua'
+                        ? `/donghua/${entry.animeId}`
+                        : `/anime/otakudesu/${entry.animeId}`;
+
+                    const isAnime = entry.type === 'anime';
+
+                    return (
+                      <div
+                        key={`${entry.animeId}-${idx}`}
+                        className="group flex flex-col justify-between p-3.5 rounded-xl bg-surface-card border border-border-subtle hover:border-amber/50 hover:shadow-lg hover:shadow-amber/5 transition-all"
+                      >
+                        <div className="flex gap-3">
+                          {/* Poster */}
+                          <div className="relative w-16 sm:w-20 aspect-[3/4] rounded-lg overflow-hidden shrink-0 border border-border-subtle bg-surface-main">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={entry.poster}
+                              alt={entry.title}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                              onError={(e) => {
+                                (e.currentTarget as HTMLImageElement).src =
+                                  'https://images.unsplash.com/photo-1578632767115-351597cf2477?w=600&auto=format&fit=crop&q=80';
+                              }}
+                            />
+                            {/* Type Badge */}
+                            <span
+                              className={`absolute top-1 left-1 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${
+                                isAnime
+                                  ? 'bg-amber/90 text-black'
+                                  : 'bg-sky-500/80 text-white'
+                              }`}
+                            >
+                              {isAnime ? 'Anime' : 'Donghua'}
+                            </span>
+                          </div>
+
+                          {/* Metadata */}
+                          <div className="flex flex-col justify-between flex-1 min-w-0">
+                            <div>
+                              <div className="flex items-center gap-1.5 text-[11px] font-mono text-amber mb-1">
+                                <Clock className="w-3 h-3 shrink-0" />
+                                <span>{entry.time}</span>
+                              </div>
+                              <Link
+                                href={detailHref}
+                                className="font-semibold text-xs sm:text-sm text-content-primary line-clamp-2 group-hover:text-amber transition-colors leading-snug"
+                                title={entry.title}
+                              >
+                                {entry.title}
+                              </Link>
+                            </div>
+                            <div className="mt-2">
+                              <span className={`inline-block px-2 py-0.5 rounded text-[11px] font-mono font-bold border ${
+                                isAnime
+                                  ? 'bg-amber/15 text-amber border-amber/30'
+                                  : 'bg-sky-500/10 text-sky-400 border-sky-500/30'
+                              }`}>
+                                {entry.episode}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Footer */}
+                        <div className="mt-3 pt-3 border-t border-border-subtle flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-1 text-[10px] text-content-muted truncate">
+                            {entry.genres?.slice(0, 2).map((g) => (
+                              <span key={g} className="px-1.5 py-0.5 rounded bg-surface-main border border-border-subtle whitespace-nowrap">
+                                {g}
+                              </span>
+                            ))}
+                          </div>
+                          <Link
+                            href={detailHref}
+                            className={`shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-bold transition-all shadow-sm active:scale-95 ${
+                              isAnime
+                                ? 'bg-amber hover:bg-amber-hover text-background shadow-amber/20'
+                                : 'bg-sky-500 hover:bg-sky-400 text-white shadow-sky-500/20'
+                            }`}
+                          >
+                            <Play className="w-3 h-3" />
+                            <span>Tonton</span>
+                          </Link>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
