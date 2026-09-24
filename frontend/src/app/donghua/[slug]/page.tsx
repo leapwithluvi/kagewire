@@ -12,6 +12,8 @@ import { StickyFooterAd } from '@/components/ads/StickyFooterAd';
 import { MediaItemListFilter } from '@/components/media/MediaItemListFilter';
 import { getResolvedSynopsis } from '@/lib/synopsis-helper';
 
+import type { Metadata } from 'next';
+
 interface DonghuaDetailPageProps {
   params: Promise<{
     slug: string;
@@ -19,6 +21,43 @@ interface DonghuaDetailPageProps {
 }
 
 export const revalidate = 300;
+
+export async function generateMetadata({ params }: DonghuaDetailPageProps): Promise<Metadata> {
+  const { slug } = await params;
+  if (!slug) return { title: 'Donghua Detail' };
+
+  const donghua = await sankaApi.getDonghuaDetail(slug);
+  if (!donghua) return { title: 'Donghua Tidak Ditemukan' };
+
+  let rawSynopsis = '';
+  const sf = donghua.synopsis as any;
+  if (typeof sf === 'string' && sf.trim()) rawSynopsis = sf.replace(/<[^>]*>/g, '').trim();
+  const desc = rawSynopsis ? rawSynopsis.slice(0, 160) : `Nonton streaming donghua ${donghua.title} sub Indo gratis kualitas HD. Episode terbaru dan terlengkap di KageWire.`;
+
+  return {
+    title: `${donghua.title} Sub Indo — Streaming Donghua Lengkap`,
+    description: desc,
+    keywords: [
+      donghua.title,
+      `${donghua.title} sub indo`,
+      'nonton donghua',
+      'donghua sub indo',
+      'streaming donghua',
+    ],
+    openGraph: {
+      title: `${donghua.title} Sub Indo | KageWire`,
+      description: desc,
+      images: donghua.poster ? [{ url: donghua.poster, alt: donghua.title }] : [],
+      type: 'video.tv_show',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${donghua.title} Sub Indo | KageWire`,
+      description: desc,
+      images: donghua.poster ? [donghua.poster] : [],
+    },
+  };
+}
 
 export default async function DonghuaDetailPage({ params }: DonghuaDetailPageProps) {
   const { slug } = await params;
@@ -61,8 +100,57 @@ export default async function DonghuaDetailPage({ params }: DonghuaDetailPagePro
     (donghua.info as any)?.Status || (donghua.info as any)?.status || ''
   );
 
+  const siteUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://kagewire.vercel.app';
+  const pageUrl = `${siteUrl}/donghua/${slug}`;
+
   return (
     <>
+      {/* Schema.org Rich Snippet */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@graph': [
+              {
+                '@type': 'TVSeries',
+                '@id': `${pageUrl}/#series`,
+                name: donghua.title,
+                description: synopsisText,
+                image: donghua.poster,
+                genre: genreNames,
+                inLanguage: 'zh',
+                subtitleLanguage: 'id',
+                numberOfEpisodes: episodes.length || undefined,
+              },
+              {
+                '@type': 'BreadcrumbList',
+                itemListElement: [
+                  {
+                    '@type': 'ListItem',
+                    position: 1,
+                    name: 'Beranda',
+                    item: siteUrl,
+                  },
+                  {
+                    '@type': 'ListItem',
+                    position: 2,
+                    name: 'Donghua',
+                    item: `${siteUrl}/donghua`,
+                  },
+                  {
+                    '@type': 'ListItem',
+                    position: 3,
+                    name: donghua.title,
+                    item: pageUrl,
+                  },
+                ],
+              },
+            ],
+          }),
+        }}
+      />
+
       {/* Iklan Melayang Bawah — hanya di halaman detail */}
       <StickyFooterAd />
 

@@ -6,7 +6,34 @@ import SectionHeader from '@/components/ui/SectionHeader';
 import { AdBanner } from '@/components/ads/AdBanner';
 import { Calendar, Sparkles } from 'lucide-react';
 
+import type { Metadata } from 'next';
+
 export const revalidate = 180;
+
+export const metadata: Metadata = {
+  title: 'Anime Sub Indo — Streaming & Jadwal Rilis Terlengkap',
+  description:
+    'Koleksi serial dan film anime subtitle Indonesia terlengkap dari sumber terpercaya Otakudesu dan Samehadaku. Update setiap hari dengan kualitas HD.',
+  keywords: [
+    'anime sub indo',
+    'nonton anime',
+    'streaming anime',
+    'anime ongoing',
+    'jadwal rilis anime',
+    'otakudesu',
+    'samehadaku',
+  ],
+  openGraph: {
+    title: 'Anime Sub Indo — Streaming Terlengkap | KageWire',
+    description:
+      'Koleksi anime subtitle Indonesia terlengkap. Update episode terbaru setiap hari kualitas HD.',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Anime Sub Indo | KageWire',
+    description: 'Streaming anime sub Indo kualitas HD update setiap hari.',
+  },
+};
 
 export default async function AnimeHubPage() {
   const [otakudesuData, samehadakuData] = await Promise.all([

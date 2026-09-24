@@ -8,6 +8,8 @@ import { StreamingNotice } from '@/components/player/StreamingNotice';
 import { AdBanner } from '@/components/ads/AdBanner';
 import { ArrowLeft } from 'lucide-react';
 
+import type { Metadata } from 'next';
+
 interface WatchPageProps {
   params: Promise<{
     source: string;
@@ -18,6 +20,42 @@ interface WatchPageProps {
 export const revalidate = 300;
 
 const ALLOWED_ANIME_SOURCES = ['otakudesu', 'samehadaku'];
+
+export async function generateMetadata({ params }: WatchPageProps): Promise<Metadata> {
+  const { source, slug } = await params;
+  if (!ALLOWED_ANIME_SOURCES.includes(source) || !slug) {
+    return { title: 'Nonton Anime' };
+  }
+
+  const streamData = await sankaApi.getAnimeEpisode(source, slug);
+  if (!streamData) {
+    return { title: 'Episode Tidak Ditemukan' };
+  }
+
+  const epTitle = streamData.title || slug.replace(/-/g, ' ');
+
+  return {
+    title: `Nonton ${epTitle} Sub Indo — Streaming Kualitas HD`,
+    description: `Nonton streaming ${epTitle} subtitle Indonesia online gratis kualitas 360p, 480p, 720p, 1080p tanpa buffering di KageWire.`,
+    keywords: [
+      epTitle,
+      `${epTitle} sub indo`,
+      `nonton ${epTitle}`,
+      'streaming anime sub indo',
+      source,
+    ],
+    openGraph: {
+      title: `Nonton ${epTitle} Sub Indo | KageWire`,
+      description: `Nonton streaming ${epTitle} subtitle Indonesia online gratis kualitas HD di KageWire.`,
+      type: 'video.episode',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `Nonton ${epTitle} Sub Indo | KageWire`,
+      description: `Streaming ${epTitle} sub Indo gratis di KageWire.`,
+    },
+  };
+}
 
 export default async function WatchPage({ params }: WatchPageProps) {
   const { source, slug } = await params;
@@ -95,8 +133,58 @@ export default async function WatchPage({ params }: WatchPageProps) {
       serverId: s.serverId,
     }));
 
+  const siteUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://kagewire.vercel.app';
+  const pageUrl = `${siteUrl}/watch/${source}/${slug}`;
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      {/* Schema.org Rich Snippet */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@graph': [
+              {
+                '@type': 'TVEpisode',
+                '@id': `${pageUrl}/#episode`,
+                name: streamData.title || slug,
+                inLanguage: 'ja',
+                subtitleLanguage: 'id',
+                partOfSeries: {
+                  '@type': 'TVSeries',
+                  name: streamData.animeId || 'Anime',
+                  url: allEpisodesUrl.startsWith('http') ? allEpisodesUrl : `${siteUrl}${allEpisodesUrl}`,
+                },
+              },
+              {
+                '@type': 'BreadcrumbList',
+                itemListElement: [
+                  {
+                    '@type': 'ListItem',
+                    position: 1,
+                    name: 'Beranda',
+                    item: siteUrl,
+                  },
+                  {
+                    '@type': 'ListItem',
+                    position: 2,
+                    name: 'Anime',
+                    item: `${siteUrl}/anime`,
+                  },
+                  {
+                    '@type': 'ListItem',
+                    position: 3,
+                    name: streamData.title || slug,
+                    item: pageUrl,
+                  },
+                ],
+              },
+            ],
+          }),
+        }}
+      />
+
       {/* Back button */}
       <div className="mb-4">
         <Link

@@ -6,7 +6,34 @@ import SectionHeader from '@/components/ui/SectionHeader';
 import { AdBanner } from '@/components/ads/AdBanner';
 import { Flame, Clock, BookOpen, Sparkles, Calendar } from 'lucide-react';
 
+import type { Metadata } from 'next';
+
 export const revalidate = 1800;
+
+export const metadata: Metadata = {
+  title: 'Komik, Manga, Manhwa & Manhua Sub Indo Terlengkap',
+  description:
+    'Baca ribuan judul komik, manga Jepang, manhwa Korea, dan manhua China terjemahan bahasa Indonesia terlengkap dan terupdate setiap hari secara gratis di KageWire.',
+  keywords: [
+    'baca komik',
+    'baca manga sub indo',
+    'baca manhwa',
+    'baca manhua',
+    'komik populer',
+    'komik terbaru',
+    'komik sub indo',
+  ],
+  openGraph: {
+    title: 'Komik, Manga, Manhwa & Manhua Sub Indo | KageWire',
+    description:
+      'Baca komik, manga, manhwa & manhua bahasa Indonesia terlengkap dan terupdate setiap hari gratis.',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Komik & Manga Sub Indo | KageWire',
+    description: 'Baca komik manga & manhwa terjemahan bahasa Indonesia terlengkap.',
+  },
+};
 
 export default async function ComicHubPage() {
   const [popularComics, latestComics] = await Promise.all([

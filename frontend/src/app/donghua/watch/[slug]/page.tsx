@@ -8,6 +8,8 @@ import { StreamingNotice } from '@/components/player/StreamingNotice';
 import { AdBanner } from '@/components/ads/AdBanner';
 import { ArrowLeft } from 'lucide-react';
 
+import type { Metadata } from 'next';
+
 interface DonghuaWatchPageProps {
   params: Promise<{
     slug: string;
@@ -15,6 +17,32 @@ interface DonghuaWatchPageProps {
 }
 
 export const revalidate = 300;
+
+export async function generateMetadata({ params }: DonghuaWatchPageProps): Promise<Metadata> {
+  const { slug } = await params;
+  if (!slug) return { title: 'Nonton Donghua' };
+
+  const streamData = await sankaApi.getDonghuaEpisode(slug);
+  if (!streamData) return { title: 'Episode Tidak Ditemukan' };
+
+  const epTitle = streamData.title || slug.replace(/-/g, ' ');
+
+  return {
+    title: `Nonton ${epTitle} Sub Indo — Streaming Donghua`,
+    description: `Nonton streaming ${epTitle} subtitle Indonesia online kualitas HD gratis tanpa buffering di KageWire.`,
+    keywords: [epTitle, `${epTitle} sub indo`, `nonton ${epTitle}`, 'streaming donghua sub indo'],
+    openGraph: {
+      title: `Nonton ${epTitle} Sub Indo | KageWire`,
+      description: `Streaming ${epTitle} subtitle Indonesia online gratis di KageWire.`,
+      type: 'video.episode',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `Nonton ${epTitle} Sub Indo | KageWire`,
+      description: `Streaming ${epTitle} subtitle Indonesia di KageWire.`,
+    },
+  };
+}
 
 export default async function DonghuaWatchPage({ params }: DonghuaWatchPageProps) {
   const { slug } = await params;
@@ -42,8 +70,58 @@ export default async function DonghuaWatchPage({ params }: DonghuaWatchPageProps
   const streamOptions = streamData.streams || [];
   const defaultUrl = streamOptions[0]?.url;
 
+  const siteUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://kagewire.vercel.app';
+  const pageUrl = `${siteUrl}/donghua/watch/${slug}`;
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      {/* Schema.org Rich Snippet */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@graph': [
+              {
+                '@type': 'TVEpisode',
+                '@id': `${pageUrl}/#episode`,
+                name: streamData.title || slug,
+                inLanguage: 'zh',
+                subtitleLanguage: 'id',
+                partOfSeries: {
+                  '@type': 'TVSeries',
+                  name: streamData.navigation?.all_slug || 'Donghua',
+                  url: allEpisodesUrl.startsWith('http') ? allEpisodesUrl : `${siteUrl}${allEpisodesUrl}`,
+                },
+              },
+              {
+                '@type': 'BreadcrumbList',
+                itemListElement: [
+                  {
+                    '@type': 'ListItem',
+                    position: 1,
+                    name: 'Beranda',
+                    item: siteUrl,
+                  },
+                  {
+                    '@type': 'ListItem',
+                    position: 2,
+                    name: 'Donghua',
+                    item: `${siteUrl}/donghua`,
+                  },
+                  {
+                    '@type': 'ListItem',
+                    position: 3,
+                    name: streamData.title || slug,
+                    item: pageUrl,
+                  },
+                ],
+              },
+            ],
+          }),
+        }}
+      />
+
       {/* Back button */}
       <div className="mb-4">
         <Link

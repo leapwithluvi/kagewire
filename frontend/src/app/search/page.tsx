@@ -5,6 +5,8 @@ import SectionHeader from '@/components/ui/SectionHeader';
 import { AdBanner } from '@/components/ads/AdBanner';
 import { Search, Tv, Play, BookOpen } from 'lucide-react';
 
+import type { Metadata } from 'next';
+
 interface SearchPageProps {
   searchParams: Promise<{
     q?: string;
@@ -12,6 +14,19 @@ interface SearchPageProps {
 }
 
 export const dynamic = 'force-dynamic';
+
+export async function generateMetadata({ searchParams }: SearchPageProps): Promise<Metadata> {
+  const { q } = await searchParams;
+  const query = q?.trim() || '';
+  return {
+    title: query ? `Hasil Pencarian: "${query}"` : 'Pencarian Media',
+    description: `Temukan judul anime, donghua, dan komik ${query ? `terkait "${query}"` : ''} di KageWire.`,
+    robots: {
+      index: false,
+      follow: true,
+    },
+  };
+}
 
 export default async function SearchPage({ searchParams }: SearchPageProps) {
   const { q } = await searchParams;

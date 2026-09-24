@@ -10,6 +10,8 @@ import { StickyFooterAd } from '@/components/ads/StickyFooterAd';
 import { MediaItemListFilter } from '@/components/media/MediaItemListFilter';
 import { getResolvedSynopsis } from '@/lib/synopsis-helper';
 
+import type { Metadata } from 'next';
+
 interface ComicDetailPageProps {
   params: Promise<{
     mangaId: string;
@@ -27,6 +29,43 @@ function safeStr(val: unknown): string {
   }
   if (typeof val === 'object') return (val as any).name || (val as any).title || '';
   return String(val);
+}
+
+export async function generateMetadata({ params }: ComicDetailPageProps): Promise<Metadata> {
+  const { mangaId } = await params;
+  if (!mangaId) return { title: 'Komik Detail' };
+
+  const comic = await sankaApi.getComicDetail(mangaId);
+  if (!comic) return { title: 'Komik Tidak Ditemukan' };
+
+  const rawDesc = safeStr(comic.description);
+  const desc = rawDesc ? rawDesc.slice(0, 160) : `Baca komik manga / manhwa ${comic.title} bahasa Indonesia terlengkap dan terupdate gratis di KageWire.`;
+  const cover = comic.cover_portrait || comic.cover;
+
+  return {
+    title: `Baca Komik ${comic.title} Bahasa Indonesia — Semua Chapter`,
+    description: desc,
+    keywords: [
+      comic.title,
+      `baca ${comic.title}`,
+      `komik ${comic.title}`,
+      'baca komik sub indo',
+      'baca manhwa',
+      'manga indonesia',
+    ],
+    openGraph: {
+      title: `Baca ${comic.title} Bahasa Indonesia | KageWire`,
+      description: desc,
+      images: cover ? [{ url: cover, alt: comic.title }] : [],
+      type: 'book',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `Baca ${comic.title} Bahasa Indonesia | KageWire`,
+      description: desc,
+      images: cover ? [cover] : [],
+    },
+  };
 }
 
 export default async function ComicDetailPage({ params }: ComicDetailPageProps) {
@@ -57,8 +96,58 @@ export default async function ComicDetailPage({ params }: ComicDetailPageProps) 
     safeStr(comic.status)
   );
 
+  const siteUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://kagewire.vercel.app';
+  const pageUrl = `${siteUrl}/comic/${mangaId}`;
+  const coverUrl = comic.cover_portrait || comic.cover;
+
   return (
     <>
+      {/* Schema.org Rich Snippet */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@graph': [
+              {
+                '@type': 'Book',
+                '@id': `${pageUrl}/#comic`,
+                name: comic.title,
+                description: descriptionText,
+                image: coverUrl,
+                genre: genreNames,
+                inLanguage: 'id',
+                bookFormat: 'EBook',
+                numberOfPages: chapterList.length || undefined,
+              },
+              {
+                '@type': 'BreadcrumbList',
+                itemListElement: [
+                  {
+                    '@type': 'ListItem',
+                    position: 1,
+                    name: 'Beranda',
+                    item: siteUrl,
+                  },
+                  {
+                    '@type': 'ListItem',
+                    position: 2,
+                    name: 'Komik',
+                    item: `${siteUrl}/comic`,
+                  },
+                  {
+                    '@type': 'ListItem',
+                    position: 3,
+                    name: comic.title,
+                    item: pageUrl,
+                  },
+                ],
+              },
+            ],
+          }),
+        }}
+      />
+
       {/* Iklan Melayang Bawah — hanya di halaman detail */}
       <StickyFooterAd />
 

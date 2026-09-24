@@ -8,7 +8,18 @@ import { AdBanner } from '@/components/ads/AdBanner';
 import { getResolvedSynopsis } from '@/lib/synopsis-helper';
 import { ChevronRight, ArrowRight, Calendar, Sparkles, BookOpen, Layers, Film, Megaphone } from 'lucide-react';
 
+import type { Metadata } from 'next';
+
 export const revalidate = 1800;
+
+export const metadata: Metadata = {
+  title: 'KageWire — Platform Streaming Anime, Donghua & Baca Komik Sub Indo',
+  description:
+    'Portal hiburan kurasi editorial anime sub Indo (Otakudesu & Samehadaku), streaming donghua resolusi HD, dan komik manga, manhwa & manhua terlengkap bahasa Indonesia.',
+  alternates: {
+    canonical: '/',
+  },
+};
 
 export default async function HomePage() {
   const [animeData, donghuaData, comicData] = await Promise.all([

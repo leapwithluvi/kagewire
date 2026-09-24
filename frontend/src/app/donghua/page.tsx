@@ -6,7 +6,33 @@ import SectionHeader from '@/components/ui/SectionHeader';
 import { AdBanner } from '@/components/ads/AdBanner';
 import { Calendar, Sparkles, Flame, Clock } from 'lucide-react';
 
+import type { Metadata } from 'next';
+
 export const revalidate = 180;
+
+export const metadata: Metadata = {
+  title: 'Donghua Sub Indo — Nonton Animasi China Kualitas HD Terlengkap',
+  description:
+    'Streaming serial donghua animasi 3D & 2D China subtitle Indonesia kualitas jernih HD. Update episode baru setiap hari lengkap dengan sinopsis dan ranking populer di KageWire.',
+  keywords: [
+    'donghua sub indo',
+    'nonton donghua',
+    'streaming donghua',
+    'animasi china',
+    'donghua populer',
+    'donghua ongoing',
+  ],
+  openGraph: {
+    title: 'Donghua Sub Indo — Streaming Animasi China | KageWire',
+    description:
+      'Streaming serial animasi donghua China subtitle Indonesia kualitas HD gratis dan lengkap.',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Donghua Sub Indo | KageWire',
+    description: 'Streaming animasi donghua China subtitle Indonesia kualitas HD.',
+  },
+};
 
 export default async function DonghuaHubPage() {
   const donghuaData = await sankaApi.getDonghuaHome();

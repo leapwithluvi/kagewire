@@ -12,6 +12,8 @@ import { StickyFooterAd } from '@/components/ads/StickyFooterAd';
 import { MediaItemListFilter } from '@/components/media/MediaItemListFilter';
 import { getResolvedSynopsis } from '@/lib/synopsis-helper';
 
+import type { Metadata } from 'next';
+
 interface AnimeDetailPageProps {
   params: Promise<{
     source: string;
@@ -22,6 +24,46 @@ interface AnimeDetailPageProps {
 export const revalidate = 300;
 
 const ALLOWED_ANIME_SOURCES = ['otakudesu', 'samehadaku'];
+
+export async function generateMetadata({ params }: AnimeDetailPageProps): Promise<Metadata> {
+  const { source, slug } = await params;
+  if (!ALLOWED_ANIME_SOURCES.includes(source) || !slug) {
+    return { title: 'Anime Detail' };
+  }
+
+  const anime = await sankaApi.getAnimeDetail(source, slug);
+  if (!anime) {
+    return { title: 'Anime Tidak Ditemukan' };
+  }
+
+  const rawSynopsis = typeof anime.synopsis === 'string' ? anime.synopsis.replace(/<[^>]*>/g, '').trim() : '';
+  const desc = rawSynopsis.slice(0, 160) || `Nonton streaming anime ${anime.title} subtitle Indonesia online gratis kualitas HD. Episode lengkap dan update terbaru di KageWire.`;
+
+  return {
+    title: `${anime.title} Sub Indo — Streaming & Episode Lengkap`,
+    description: desc,
+    keywords: [
+      anime.title,
+      `${anime.title} sub indo`,
+      `nonton ${anime.title}`,
+      `streaming ${anime.title}`,
+      'anime sub indo',
+      source,
+    ],
+    openGraph: {
+      title: `${anime.title} Sub Indo | KageWire`,
+      description: desc,
+      images: anime.poster ? [{ url: anime.poster, alt: anime.title }] : [],
+      type: 'video.tv_show',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${anime.title} Sub Indo | KageWire`,
+      description: desc,
+      images: anime.poster ? [anime.poster] : [],
+    },
+  };
+}
 
 export default async function AnimeDetailPage({ params }: AnimeDetailPageProps) {
   const { source, slug } = await params;
@@ -72,8 +114,57 @@ export default async function AnimeDetailPage({ params }: AnimeDetailPageProps) 
   const episodeList = anime.episodeList || [];
   const recommendedList = anime.recommendedAnimeList || [];
 
+  const siteUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://kagewire.vercel.app';
+  const pageUrl = `${siteUrl}/anime/${source}/${slug}`;
+
   return (
     <>
+      {/* Schema.org Rich Snippet */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@graph': [
+              {
+                '@type': 'TVSeries',
+                '@id': `${pageUrl}/#series`,
+                name: anime.title,
+                description: synopsisText,
+                image: anime.poster,
+                genre: genreNames,
+                inLanguage: 'ja',
+                subtitleLanguage: 'id',
+                numberOfEpisodes: episodeList.length || undefined,
+              },
+              {
+                '@type': 'BreadcrumbList',
+                itemListElement: [
+                  {
+                    '@type': 'ListItem',
+                    position: 1,
+                    name: 'Beranda',
+                    item: siteUrl,
+                  },
+                  {
+                    '@type': 'ListItem',
+                    position: 2,
+                    name: 'Anime',
+                    item: `${siteUrl}/anime`,
+                  },
+                  {
+                    '@type': 'ListItem',
+                    position: 3,
+                    name: anime.title,
+                    item: pageUrl,
+                  },
+                ],
+              },
+            ],
+          }),
+        }}
+      />
+
       {/* Iklan Melayang Bawah — hanya di halaman detail */}
       <StickyFooterAd />
 
