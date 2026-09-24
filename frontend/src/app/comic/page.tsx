@@ -2,6 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import { sankaApi } from '@/lib/sanka-api';
 import MediaCard from '@/components/ui/MediaCard';
+import SectionHeader from '@/components/ui/SectionHeader';
 import { AdBanner } from '@/components/ads/AdBanner';
 import { Flame, Clock, BookOpen, Sparkles, Calendar } from 'lucide-react';
 
@@ -65,15 +66,14 @@ export default async function ComicHubPage() {
 
       {/* Popular Comics: 4-5 items, swipeable on mobile */}
       <section className="mb-14">
-        <div className="flex items-baseline justify-between mb-5 border-b border-border-subtle pb-3">
-          <h2 className="font-editorial text-xl font-normal text-content-primary flex items-center gap-2">
-            <Flame className="w-4 h-4 text-amber" />
-            Komik Terpopuler Minggu Ini
-          </h2>
-          <span className="text-xs text-content-muted num-tabular">
-            {Math.min(popularComics.length, 5)} Judul
-          </span>
-        </div>
+        <SectionHeader
+          title="Komik Terpopuler Minggu Ini"
+          badge={`${Math.min(popularComics.length, 5)} Judul`}
+          subtitle="Manhwa, Manga, dan Manhua terfavorit dengan pembaca terbanyak"
+          icon={<Flame className="w-4 h-4 text-amber" />}
+          actionHref="/comic/ongoing"
+          actionText="Semua Populer"
+        />
         {popularComics.length > 0 ? (
           <div className="flex overflow-x-auto gap-4 pb-3 pt-1 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-4 lg:grid-cols-5 sm:overflow-visible snap-x snap-mandatory scrollbar-none">
             {popularComics.slice(0, 5).map((comic) => (
@@ -104,15 +104,14 @@ export default async function ComicHubPage() {
       {/* Latest Updates: Many items in standard responsive grid */}
       {latestComics.length > 0 && (
         <section className="mb-14">
-          <div className="flex items-baseline justify-between mb-5 border-b border-border-subtle pb-3">
-            <h2 className="font-editorial text-xl font-normal text-content-primary flex items-center gap-2">
-              <Clock className="w-4 h-4 text-amber" />
-              Chapter Terbaru Rilis
-            </h2>
-            <span className="text-xs text-content-muted num-tabular">
-              {latestComics.length} Update
-            </span>
-          </div>
+          <SectionHeader
+            title="Chapter Terbaru Rilis"
+            badge={`${latestComics.length} Update`}
+            subtitle="Update terjemahan chapter komik bahasa Indonesia hari ini"
+            icon={<Clock className="w-4 h-4 text-amber" />}
+            actionHref="/comic/list"
+            actionText="Katalog Komik"
+          />
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {latestComics.map((comic) => (
               <MediaCard

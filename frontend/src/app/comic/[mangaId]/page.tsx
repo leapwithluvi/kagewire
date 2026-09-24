@@ -8,6 +8,7 @@ import { StackedDetailBanners } from '@/components/ads/StackedDetailBanners';
 import { DetailPopupAd } from '@/components/ads/DetailPopupAd';
 import { StickyFooterAd } from '@/components/ads/StickyFooterAd';
 import { MediaItemListFilter } from '@/components/media/MediaItemListFilter';
+import { getResolvedSynopsis } from '@/lib/synopsis-helper';
 
 interface ComicDetailPageProps {
   params: Promise<{
@@ -17,8 +18,24 @@ interface ComicDetailPageProps {
 
 export const revalidate = 1800;
 
+// Safely extract string from any value (handles {id, name, slug} objects too)
+function safeStr(val: unknown): string {
+  if (!val) return '';
+  if (typeof val === 'string') return val;
+  if (Array.isArray(val)) {
+    return val.map((v) => (typeof v === 'string' ? v : (v as any)?.name || '')).filter(Boolean).join(', ');
+  }
+  if (typeof val === 'object') return (val as any).name || (val as any).title || '';
+  return String(val);
+}
+
 export default async function ComicDetailPage({ params }: ComicDetailPageProps) {
   const { mangaId } = await params;
+
+  if (!mangaId || mangaId.length > 150 || mangaId.includes('/') || mangaId.includes('..')) {
+    notFound();
+  }
+
   const [comic, chapters] = await Promise.all([
     sankaApi.getComicDetail(mangaId),
     sankaApi.getComicChapters(mangaId),
@@ -29,6 +46,16 @@ export default async function ComicDetailPage({ params }: ComicDetailPageProps) 
   }
 
   const chapterList = Array.isArray(chapters) ? chapters : [];
+  const formatLabel = safeStr(comic.format) || 'Manhwa';
+  const rawDescription = safeStr(comic.description);
+  const genreNames = (comic.genres || []).map((g: any) => (typeof g === 'string' ? g : g.name || g.title || ''));
+  const descriptionText = getResolvedSynopsis(
+    comic.title,
+    'comic',
+    rawDescription,
+    genreNames,
+    safeStr(comic.status)
+  );
 
   return (
     <>
@@ -77,7 +104,7 @@ export default async function ComicDetailPage({ params }: ComicDetailPageProps) 
             <div>
               <div className="flex items-center gap-2">
                 <span className="px-2 py-0.5 rounded text-[11px] font-semibold uppercase tracking-wider bg-surface-secondary text-content-secondary border border-border-subtle">
-                  {comic.format || 'Manhwa'}
+                  {formatLabel}
                 </span>
                 {comic.status && (
                   <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-surface-secondary text-content-muted border border-border-subtle">
@@ -137,7 +164,7 @@ export default async function ComicDetailPage({ params }: ComicDetailPageProps) 
                 Sinopsis Cerita
               </h3>
               <p className="text-xs sm:text-sm text-content-secondary leading-relaxed whitespace-pre-line max-w-3xl">
-                {comic.description || 'Tidak ada deskripsi tersedia.'}
+                {descriptionText}
               </p>
             </div>
           </div>

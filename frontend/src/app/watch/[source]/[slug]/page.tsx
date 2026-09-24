@@ -15,10 +15,25 @@ interface WatchPageProps {
   }>;
 }
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 300;
+
+const ALLOWED_ANIME_SOURCES = ['otakudesu', 'samehadaku'];
 
 export default async function WatchPage({ params }: WatchPageProps) {
   const { source, slug } = await params;
+
+  // Security: validate source allowlist and prevent path traversal
+  if (
+    !source ||
+    !ALLOWED_ANIME_SOURCES.includes(source) ||
+    !slug ||
+    slug.length > 150 ||
+    slug.includes('/') ||
+    slug.includes('..')
+  ) {
+    notFound();
+  }
+
   const streamData = await sankaApi.getAnimeEpisode(source, slug);
 
   if (!streamData) {

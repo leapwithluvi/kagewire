@@ -161,7 +161,6 @@ export default function Navbar() {
       icon: Layers,
       links: [
         { label: 'Daftar Genre', href: '/genre' },
-        { label: 'Jadwal Rilis Episode Anime', href: '/schedule' },
         { label: 'Sewa & Pasang Iklan', href: '/advertise', highlight: true },
       ],
     },

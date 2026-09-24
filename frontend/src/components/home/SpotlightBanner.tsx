@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Play, Star, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Play, Star, ChevronLeft, ChevronRight, BookOpen } from 'lucide-react';
 
 interface SpotlightItem {
   id: string;
@@ -86,8 +86,17 @@ export default function SpotlightBanner({ items }: SpotlightBannerProps) {
               href={current.href}
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-md bg-amber hover:bg-amber-hover text-black text-xs sm:text-sm font-bold tracking-wide transition-all shadow-subtle active:scale-95"
             >
-              <Play className="w-3.5 h-3.5 fill-black" />
-              Tonton Sekarang
+              {current.type === 'comic' ? (
+                <>
+                  <BookOpen className="w-3.5 h-3.5 text-black" />
+                  <span>Baca Sekarang</span>
+                </>
+              ) : (
+                <>
+                  <Play className="w-3.5 h-3.5 fill-black" />
+                  <span>Tonton Sekarang</span>
+                </>
+              )}
             </Link>
           </div>
         </div>

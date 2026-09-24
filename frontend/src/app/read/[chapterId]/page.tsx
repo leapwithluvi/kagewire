@@ -13,6 +13,11 @@ export const revalidate = 3600;
 
 export default async function ReadPage({ params }: ReadPageProps) {
   const { chapterId } = await params;
+
+  if (!chapterId || chapterId.length > 150 || chapterId.includes('/') || chapterId.includes('..')) {
+    notFound();
+  }
+
   const chapterData = await sankaApi.getComicChapterReader(chapterId);
 
   if (!chapterData) {

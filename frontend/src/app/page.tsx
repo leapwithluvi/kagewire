@@ -2,8 +2,10 @@ import React from 'react';
 import Link from 'next/link';
 import { sankaApi } from '@/lib/sanka-api';
 import MediaCard from '@/components/ui/MediaCard';
+import SectionHeader from '@/components/ui/SectionHeader';
 import SpotlightBanner from '@/components/home/SpotlightBanner';
 import { AdBanner } from '@/components/ads/AdBanner';
+import { getResolvedSynopsis } from '@/lib/synopsis-helper';
 import { ChevronRight, ArrowRight, Calendar, Sparkles, BookOpen, Layers, Film, Megaphone } from 'lucide-react';
 
 export const revalidate = 1800;
@@ -26,7 +28,7 @@ export default async function HomePage() {
       id: d.slug,
       title: d.title,
       poster: d.poster,
-      synopsis: d.synopsis || 'Serial animasi donghua dengan visual memukau dan kisah kultivasi yang mendalam.',
+      synopsis: getResolvedSynopsis(d.title, 'donghua', d.synopsis),
       type: 'donghua' as const,
       href: `/donghua/${d.slug}`,
       rating: '9.8',
@@ -35,7 +37,7 @@ export default async function HomePage() {
       id: a.animeId,
       title: a.title,
       poster: a.poster,
-      synopsis: `Episode terbaru ${a.episodes || ''} telah rilis. Ikuti kelanjutan cerita serial ongoing favorit Anda di KageWire.`,
+      synopsis: getResolvedSynopsis(a.title, 'anime'),
       type: 'anime' as const,
       href: `/anime/otakudesu/${a.animeId}`,
       rating: '8.9',
@@ -44,7 +46,7 @@ export default async function HomePage() {
       id: c.manga_id,
       title: c.title,
       poster: c.cover_portrait || c.cover,
-      synopsis: c.description || 'Komik manhwa & manga terpopuler dengan jutaan pembaca.',
+      synopsis: getResolvedSynopsis(c.title, 'comic', c.description),
       type: 'comic' as const,
       href: `/comic/${c.manga_id}`,
       rating: c.rating ? String(c.rating) : '9.5',
@@ -107,23 +109,14 @@ export default async function HomePage() {
 
       {/* SECTION 1: Anime Ongoing Terbaru */}
       <section className="mb-14">
-        <div className="flex items-center justify-between gap-4 mb-5 border-b border-border-subtle pb-3">
-          <div>
-            <h2 className="font-editorial text-xl sm:text-2xl font-normal text-content-primary tracking-tight">
-              Anime Ongoing Terbaru
-            </h2>
-            <p className="text-xs text-content-secondary mt-0.5">
-              Rilis mingguan dengan terjemahan bahasa Indonesia
-            </p>
-          </div>
-          <Link
-            href="/anime"
-            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-amber/10 border border-amber/40 text-xs sm:text-sm font-bold text-amber hover:bg-amber hover:text-black transition-all shadow-sm hover:shadow-amber/20 active:scale-95 shrink-0"
-          >
-            <span>Lihat Semua</span>
-            <ChevronRight className="w-4 h-4" />
-          </Link>
-        </div>
+        <SectionHeader
+          title="Anime Ongoing Terbaru"
+          badge={`${ongoingAnime.length} Judul`}
+          subtitle="Rilis mingguan dengan terjemahan bahasa Indonesia kualitas Full HD"
+          icon={<Sparkles className="w-4 h-4 text-amber" />}
+          actionHref="/anime"
+          actionText="Lihat Semua"
+        />
 
         {ongoingAnime.length > 0 ? (
           <>
@@ -164,23 +157,14 @@ export default async function HomePage() {
 
       {/* SECTION 2: Donghua Trending */}
       <section className="mb-14">
-        <div className="flex items-center justify-between gap-4 mb-5 border-b border-border-subtle pb-3">
-          <div>
-            <h2 className="font-editorial text-xl sm:text-2xl font-normal text-content-primary tracking-tight">
-              Donghua Terpopuler (Chinese 3D/2D)
-            </h2>
-            <p className="text-xs text-content-secondary mt-0.5">
-              Petualangan kultivasi dan animasi sinematik Tiongkok
-            </p>
-          </div>
-          <Link
-            href="/donghua"
-            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-sky-400/10 border border-sky-400/40 text-xs sm:text-sm font-bold text-sky-400 hover:bg-sky-400 hover:text-black transition-all shadow-sm hover:shadow-sky-400/20 active:scale-95 shrink-0"
-          >
-            <span>Lihat Semua</span>
-            <ChevronRight className="w-4 h-4" />
-          </Link>
-        </div>
+        <SectionHeader
+          title="Donghua Terpopuler (Chinese 3D/2D)"
+          badge={`${donghuaPopular.length} Serial`}
+          subtitle="Petualangan kultivasi dan animasi sinematik Tiongkok paling diminati"
+          icon={<Film className="w-4 h-4 text-amber" />}
+          actionHref="/donghua"
+          actionText="Lihat Semua"
+        />
 
         {donghuaPopular.length > 0 ? (
           <>
@@ -217,23 +201,14 @@ export default async function HomePage() {
 
       {/* SECTION 3: Manga & Manhwa Populer */}
       <section className="mb-14">
-        <div className="flex items-center justify-between gap-4 mb-5 border-b border-border-subtle pb-3">
-          <div>
-            <h2 className="font-editorial text-xl sm:text-2xl font-normal text-content-primary tracking-tight">
-              Manga & Manhwa Pilihan
-            </h2>
-            <p className="text-xs text-content-secondary mt-0.5">
-              Komik dengan rating tinggi dan chapter terbaru
-            </p>
-          </div>
-          <Link
-            href="/comic"
-            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-emerald-400/10 border border-emerald-400/40 text-xs sm:text-sm font-bold text-emerald-400 hover:bg-emerald-400 hover:text-black transition-all shadow-sm hover:shadow-emerald-400/20 active:scale-95 shrink-0"
-          >
-            <span>Lihat Semua</span>
-            <ChevronRight className="w-4 h-4" />
-          </Link>
-        </div>
+        <SectionHeader
+          title="Manga & Manhwa Pilihan"
+          badge={`${popularComics.length} Judul`}
+          subtitle="Komik dengan rating tinggi dan chapter terbaru yang paling banyak dibaca"
+          icon={<BookOpen className="w-4 h-4 text-amber" />}
+          actionHref="/comic"
+          actionText="Lihat Semua"
+        />
 
         {popularComics.length > 0 ? (
           <>

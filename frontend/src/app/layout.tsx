@@ -1,7 +1,9 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import { Suspense } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
+import TopProgressBar from '@/components/ui/TopProgressBar';
 
 export const metadata: Metadata = {
   title: 'KageWire — Editorial Anime, Donghua & Comic Platform',
@@ -29,6 +31,9 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-screen flex flex-col bg-background text-content-primary font-sans antialiased selection:bg-amber selection:text-black">
+        <Suspense fallback={null}>
+          <TopProgressBar />
+        </Suspense>
         <Navbar />
         <main className="flex-1 w-full pt-16">{children}</main>
         <Footer />

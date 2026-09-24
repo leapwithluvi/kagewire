@@ -15,6 +15,15 @@ KageWire telah dirombak menjadi platform streaming Anime, Donghua, dan pembaca M
 
 ---
 
+## ⚖️ Prinsip Arsitektur & Penyedia Data
+
+- **Upstream Data Provider**: KageWire tidak memiliki atau mengelola basis data primer untuk konten anime, donghua, atau komik. Seluruh data bersumber langsung dari **SankaApi**.
+- **No Standalone Backend / CMS**: Tidak ada basis data terpisah, CMS, atau sistem autentikasi server-side yang dibuat.
+- **Lightweight BFF / Proxy**: Next.js Server Components dan Route Handlers (`src/app/api/*`) bertindak sebagai lapisan Backend-for-Frontend (BFF) / API proxy ringan untuk normalisasi respons, perlindungan rate limit, dan caching (Upstash Redis).
+- **Client-Side State**: Data personal seperti histori tontonan, progres chapter, dan bookmark disimpan langsung di peramban pengguna melalui LocalStorage (`src/lib/store.ts`).
+
+---
+
 ## 📂 Struktur Direktori
 
 ```

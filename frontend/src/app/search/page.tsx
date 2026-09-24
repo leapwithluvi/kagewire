@@ -1,8 +1,9 @@
 import React from 'react';
 import { sankaApi } from '@/lib/sanka-api';
 import MediaCard from '@/components/ui/MediaCard';
+import SectionHeader from '@/components/ui/SectionHeader';
 import { AdBanner } from '@/components/ads/AdBanner';
-import { Search } from 'lucide-react';
+import { Search, Tv, Play, BookOpen } from 'lucide-react';
 
 interface SearchPageProps {
   searchParams: Promise<{
@@ -78,11 +79,12 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
           {/* Anime Results */}
           {animeResults.length > 0 && (
             <section>
-              <div className="flex items-baseline justify-between mb-5 border-b border-border-subtle pb-3">
-                <h2 className="font-editorial text-xl font-normal text-content-primary">
-                  Anime <span className="text-content-muted text-sm font-sans">({animeResults.length})</span>
-                </h2>
-              </div>
+              <SectionHeader
+                title="Anime Sub Indo"
+                badge={`${animeResults.length} Judul`}
+                subtitle="Hasil pencarian judul anime subtitle Indonesia"
+                icon={<Tv className="w-4 h-4 text-amber" />}
+              />
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                 {animeResults.map((item, idx) => (
                   <MediaCard
@@ -103,11 +105,12 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
           {/* Donghua Results */}
           {donghuaResults.length > 0 && (
             <section>
-              <div className="flex items-baseline justify-between mb-5 border-b border-border-subtle pb-3">
-                <h2 className="font-editorial text-xl font-normal text-content-primary">
-                  Donghua <span className="text-content-muted text-sm font-sans">({donghuaResults.length})</span>
-                </h2>
-              </div>
+              <SectionHeader
+                title="Donghua Animasi Mandarin"
+                badge={`${donghuaResults.length} Judul`}
+                subtitle="Hasil pencarian serial donghua kultivasi & aksi"
+                icon={<Play className="w-4 h-4 text-amber fill-amber/20" />}
+              />
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                 {donghuaResults.map((item, idx) => (
                   <MediaCard
@@ -128,11 +131,12 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
           {/* Comic Results */}
           {comicResults.length > 0 && (
             <section>
-              <div className="flex items-baseline justify-between mb-5 border-b border-border-subtle pb-3">
-                <h2 className="font-editorial text-xl font-normal text-content-primary">
-                  Manga & Manhwa <span className="text-content-muted text-sm font-sans">({comicResults.length})</span>
-                </h2>
-              </div>
+              <SectionHeader
+                title="Manga & Manhwa"
+                badge={`${comicResults.length} Judul`}
+                subtitle="Hasil pencarian komik, manhwa, dan manhua bahasa Indonesia"
+                icon={<BookOpen className="w-4 h-4 text-amber" />}
+              />
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                 {comicResults.map((item, idx) => (
                   <MediaCard

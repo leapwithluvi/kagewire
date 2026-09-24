@@ -1,4 +1,4 @@
-export type MediaType = 'anime' | 'donghua' | 'comic';
+export type MediaType = 'anime' | 'donghua' | 'comic' | 'komik';
 
 export interface BaseMedia {
   id: string;
@@ -96,6 +96,7 @@ export interface DonghuaItem {
   episodes?: string | number;
   status?: string;
   type?: string;
+  genres?: string[];
 }
 
 export interface DonghuaDetail {

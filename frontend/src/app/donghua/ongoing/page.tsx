@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { sankaApi } from '@/lib/sanka-api';
 import MediaCard from '@/components/ui/MediaCard';
+import SectionHeader from '@/components/ui/SectionHeader';
 import { AdBanner } from '@/components/ads/AdBanner';
 import { Sparkles, Calendar } from 'lucide-react';
 
@@ -51,6 +52,13 @@ export default async function DonghuaOngoingPage() {
 
         {/* Ad Placement */}
         <AdBanner slotId="donghua-leaderboard" className="mb-8" />
+
+        {/* Section Header */}
+        <SectionHeader
+          title="Seluruh Donghua On-Going"
+          badge={`${donghuaList.length} Serial`}
+          subtitle="Serial animasi 3D/2D Tiongkok yang aktif merilis episode baru pekan ini"
+        />
 
         {/* Donghua Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">

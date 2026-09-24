@@ -129,20 +129,28 @@ export function MediaItemListFilter({
   return (
     <div className="w-full">
       {/* Header with Title and Count */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 border-b border-border-subtle pb-3">
-        <div className="flex items-center gap-2">
-          {type === 'chapter' ? (
-            <Layers className="w-5 h-5 text-amber" />
-          ) : (
-            <Play className="w-5 h-5 text-amber fill-amber/20" />
-          )}
-          <h2 className="font-editorial text-xl sm:text-2xl font-normal text-content-primary">
-            {title || defaultTitle}
-          </h2>
-          <span className="ml-2 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-surface-card text-content-muted border border-border-subtle num-tabular">
-            {items.length} {label}
-          </span>
-        </div>
+      <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-surface-card via-surface-card/95 to-surface-secondary/70 border border-border-subtle p-3.5 sm:p-4 mb-5 shadow-sm backdrop-blur-sm">
+        {/* Decorative left accent line */}
+        <div className="absolute left-0 top-0 bottom-0 w-1 sm:w-1.5 bg-gradient-to-b from-amber via-amber-light to-amber shadow-[0_0_10px_rgba(245,158,11,0.5)]" />
+
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pl-2 sm:pl-2.5">
+          <div className="flex items-center gap-2.5">
+            <div className="p-1.5 sm:p-2 rounded-lg bg-amber/15 text-amber border border-amber/30 shrink-0">
+              {type === 'chapter' ? (
+                <Layers className="w-4 h-4 sm:w-5 sm:h-5 text-amber" />
+              ) : (
+                <Play className="w-4 h-4 sm:w-5 sm:h-5 text-amber fill-amber/20" />
+              )}
+            </div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <h2 className="font-editorial text-base sm:text-xl font-bold text-white tracking-tight leading-snug">
+                {title || defaultTitle}
+              </h2>
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] sm:text-xs font-bold font-mono bg-amber/15 text-amber border border-amber/30 num-tabular shadow-inner">
+                {items.length} {label}
+              </span>
+            </div>
+          </div>
 
         {/* Filter Controls Bar */}
         <div className="flex flex-wrap items-center gap-2.5">
@@ -203,6 +211,7 @@ export function MediaItemListFilter({
             <ArrowUpDown className="w-3.5 h-3.5 text-amber" />
             <span>{sortOrder === 'desc' ? 'Terbaru' : 'Terlama'}</span>
           </button>
+          </div>
         </div>
       </div>
 

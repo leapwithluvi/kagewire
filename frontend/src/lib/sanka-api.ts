@@ -83,6 +83,31 @@ async function sankaFetch<T>(endpoint: string, revalidateSec = 1800): Promise<T 
   );
 }
 
+export function extractText(val: any): string {
+  if (!val) return '';
+  if (typeof val === 'string') {
+    return val.replace(/<[^>]*>/g, '').trim();
+  }
+  if (Array.isArray(val)) {
+    return val
+      .map((item) => (typeof item === 'string' ? item.replace(/<[^>]*>/g, '').trim() : extractText(item)))
+      .filter(Boolean)
+      .join('\n\n');
+  }
+  if (typeof val === 'object') {
+    if (Array.isArray(val.paragraphs)) {
+      return val.paragraphs
+        .map((p: any) => (typeof p === 'string' ? p.replace(/<[^>]*>/g, '').trim() : String(p)))
+        .join('\n\n');
+    }
+    if (typeof val.text === 'string') return val.text.replace(/<[^>]*>/g, '').trim();
+    if (typeof val.content === 'string') return val.content.replace(/<[^>]*>/g, '').trim();
+    if (typeof val.description === 'string') return val.description.replace(/<[^>]*>/g, '').trim();
+    if (typeof val.synopsis === 'string') return val.synopsis.replace(/<[^>]*>/g, '').trim();
+  }
+  return String(val);
+}
+
 export const sankaApi = {
   // --- ANIME ---
   async getAnimeHome(): Promise<{ ongoing: { animeList: AnimeOngoingItem[] }; completed?: { animeList: AnimeOngoingItem[] } } | null> {
@@ -119,15 +144,114 @@ export const sankaApi = {
 
   async getAnimeDetail(source: string, slug: string): Promise<AnimeDetail | null> {
     if (USE_MOCK_DATA) {
+      const match = mockAnimeOngoing.find((a) => a.animeId === slug);
+      const title = match ? match.title : slug.replace(/-/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
+      const isSoloLeveling = slug.toLowerCase().includes('solo-leveling');
       return {
         ...mockAnimeDetail,
-        title: slug.replace(/-/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase()),
+        title,
+        poster: match ? match.poster : mockAnimeDetail.poster,
+        synopsis: isSoloLeveling ? mockAnimeDetail.synopsis : '',
       };
     }
     const endpoint = source === 'samehadaku' ? `/anime/samehadaku/anime/${slug}` : `/anime/anime/${slug}`;
     const raw = await sankaFetch<any>(endpoint, 3600);
     if (!raw) return null;
-    return (raw.data || raw) as AnimeDetail;
+    const data = raw.data || raw;
+
+    const title = data.title || data.anime_title || data.name || slug.replace(/-/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
+    const poster = data.poster || data.thumb || data.thumbnail || data.image || '';
+    const japanese = data.japanese || data.japanese_title || data.native_title || '';
+    const score = data.score || data.rating || '';
+    const producers = data.producers || data.producer || '';
+    const type = data.type || 'TV';
+    const status = data.status || '';
+    const episodes = data.episodes || data.total_episode || data.total_episodes || '';
+    const duration = data.duration || '';
+    const aired = data.aired || data.release_date || '';
+    const studios = data.studios || data.studio || '';
+
+    // Synopsis normalization: handle string, array of strings, object with paragraphs, sinopsis, description
+    const synopsis =
+      extractText(data.synopsis) ||
+      extractText(data.sinopsis) ||
+      extractText(data.description) ||
+      '';
+
+    // Genre List normalization
+    const rawGenres = data.genreList || data.genre_list || data.genres || [];
+    const genreList = Array.isArray(rawGenres)
+      ? rawGenres.map((g: any) => {
+          if (typeof g === 'string') {
+            return {
+              title: g,
+              name: g,
+              slug: g.toLowerCase().replace(/\s+/g, '-'),
+              genreId: g.toLowerCase().replace(/\s+/g, '-'),
+            };
+          }
+          return {
+            title: g.title || g.genre_title || g.name || '',
+            name: g.name || g.genre_title || g.title || '',
+            slug: g.genreId || g.genre_id || g.slug || g.genre_endpoint || '',
+            genreId: g.genreId || g.genre_id || g.slug || '',
+            href: g.href || `/genre/${g.genreId || g.genre_id || g.slug}`,
+          };
+        })
+      : [];
+
+    // Episode List normalization
+    const rawEpisodes = data.episodeList || data.episode_list || data.episodes || [];
+    const episodeList = Array.isArray(rawEpisodes)
+      ? rawEpisodes.map((ep: any, idx: number) => {
+          const epSlug =
+            ep.episodeId ||
+            ep.episode_endpoint ||
+            ep.slug ||
+            ep.id ||
+            ep.href?.split('/').filter(Boolean).pop() ||
+            `episode-${idx + 1}`;
+          return {
+            title: ep.title || ep.episode_title || ep.name || `Episode ${ep.eps || ep.episode || idx + 1}`,
+            episodeId: epSlug,
+            href: ep.href || `/watch/${source}/${epSlug}`,
+            eps: ep.eps || ep.episode || idx + 1,
+            date: ep.date || ep.episode_date || ep.release_date || '',
+          };
+        })
+      : [];
+
+    // Recommended Anime normalization
+    const rawRecs = data.recommendedAnimeList || data.recommendations || data.recommended_anime_list || [];
+    const recommendedAnimeList = Array.isArray(rawRecs)
+      ? rawRecs.map((rec: any) => {
+          const recId = rec.animeId || rec.endpoint || rec.slug || rec.id || '';
+          return {
+            title: rec.title || rec.anime_title || '',
+            poster: rec.poster || rec.thumb || rec.thumbnail || '',
+            animeId: recId,
+            href: rec.href || `/anime/${source}/${recId}`,
+          };
+        })
+      : [];
+
+    return {
+      title,
+      poster,
+      japanese,
+      score,
+      producers,
+      type,
+      status,
+      episodes,
+      duration,
+      aired,
+      studios,
+      synopsis,
+      genreList,
+      episodeList,
+      recommendedAnimeList,
+    };
   },
 
   async getAnimeEpisode(source: string, slug: string): Promise<EpisodeStreamData | null> {
@@ -137,10 +261,61 @@ export const sankaApi = {
         title: `${slug.replace(/-/g, ' ').toUpperCase()} Subtitle Indonesia`,
       };
     }
-    const endpoint = source === 'samehadaku' ? `/anime/samehadaku/episode/${slug}` : `/anime/episode/${slug}`;
-    const raw = await sankaFetch<any>(endpoint, 1800);
+
+    // Try multiple endpoints for robustness — providers may have different prefixes
+    let raw: any = null;
+    if (source === 'samehadaku') {
+      raw = await sankaFetch<any>(`/anime/samehadaku/episode/${slug}`, 1800);
+    } else {
+      // Otakudesu: try primary, then prefixed endpoint as fallback
+      raw = await sankaFetch<any>(`/anime/episode/${slug}`, 1800);
+      if (!raw) {
+        raw = await sankaFetch<any>(`/anime/otakudesu/episode/${slug}`, 1800);
+      }
+    }
+
     if (!raw) return null;
-    return (raw.data || raw) as EpisodeStreamData;
+    const data = raw.data || raw;
+
+    const prev = data.prevEpisode || data.previous_episode || data.prev_episode;
+    const next = data.nextEpisode || data.next_episode;
+
+    return {
+      title: data.title || data.episode_title || `${slug.replace(/-/g, ' ').toUpperCase()}`,
+      animeId: data.animeId || data.anime_id || data.anime_endpoint || '',
+      defaultStreamingUrl: data.defaultStreamingUrl || data.default_streaming_url || data.stream_url || '',
+      hasPrevEpisode: data.hasPrevEpisode ?? data.has_previous_episode ?? Boolean(prev),
+      prevEpisode: prev
+        ? {
+            title: prev.title || prev.name || 'Episode Sebelumnya',
+            episodeId:
+              prev.episodeId ||
+              prev.episode_endpoint ||
+              prev.id ||
+              prev.slug ||
+              prev.href?.split('/').filter(Boolean).pop() ||
+              '',
+            href: prev.href || `/watch/${source}/${prev.episodeId || prev.episode_endpoint || prev.slug || ''}`,
+          }
+        : null,
+      hasNextEpisode: data.hasNextEpisode ?? data.has_next_episode ?? Boolean(next),
+      nextEpisode: next
+        ? {
+            title: next.title || next.name || 'Episode Berikutnya',
+            episodeId:
+              next.episodeId ||
+              next.episode_endpoint ||
+              next.id ||
+              next.slug ||
+              next.href?.split('/').filter(Boolean).pop() ||
+              '',
+            href: next.href || `/watch/${source}/${next.episodeId || next.episode_endpoint || next.slug || ''}`,
+          }
+        : null,
+      server: data.server || (data.server_list ? { serverList: data.server_list } : undefined),
+      streams: data.streams || [],
+      downloadUrl: data.downloadUrl || data.download_url || data.download_links || null,
+    };
   },
 
   async searchAnime(query: string): Promise<AnimeOngoingItem[]> {
@@ -170,12 +345,12 @@ export const sankaApi = {
         latest: mockDonghuaList.slice(1),
       };
     }
-    // New endpoint: /anime/donghua/home/:page returns { latest_release, completed_donghua }
-    // We also fetch ongoing for popular list
-    const [homeData, ongoingData] = await Promise.all([
-      sankaFetch<{ latest_release: DonghuaItem[]; completed_donghua: DonghuaItem[] }>('/anime/donghua/home/1', 1800),
-      sankaFetch<{ ongoing_donghua: DonghuaItem[] }>('/anime/donghua/ongoing/1', 1800),
+    const [homeRaw, ongoingRaw] = await Promise.all([
+      sankaFetch<any>('/anime/donghua/home/1', 1800),
+      sankaFetch<any>('/anime/donghua/ongoing/1', 1800),
     ]);
+    const homeData = (homeRaw as any)?.data || homeRaw;
+    const ongoingData = (ongoingRaw as any)?.data || ongoingRaw;
     return {
       slider: ongoingData?.ongoing_donghua?.slice(0, 5) || [],
       popular: ongoingData?.ongoing_donghua?.slice(0, 10) || [],
@@ -186,13 +361,98 @@ export const sankaApi = {
   async getDonghuaDetail(slug: string): Promise<DonghuaDetail | null> {
     if (USE_MOCK_DATA) {
       const match = mockDonghuaList.find((d) => d.slug === slug);
+      const isPerfectWorld = slug.toLowerCase().includes('perfect-world');
       return {
         ...mockDonghuaDetail,
-        title: match ? match.title : slug.replace(/-/g, ' ').toUpperCase(),
+        ...(match ? {
+          title: match.title,
+          poster: match.poster,
+          rating: match.rating !== undefined ? String(match.rating) : mockDonghuaDetail.rating,
+          genres: match.genres,
+          synopsis: match.synopsis || '',
+        } : {
+          title: slug.replace(/-/g, ' ').toUpperCase(),
+          synopsis: isPerfectWorld ? mockDonghuaDetail.synopsis : '',
+        }),
       };
     }
-    // New endpoint: /anime/donghua/detail/:slug
-    return sankaFetch(`/anime/donghua/detail/${slug}`, 3600);
+    const raw = await sankaFetch<any>(`/anime/donghua/detail/${slug}`, 3600);
+    if (!raw) return null;
+    const data = raw.data || raw;
+
+    const title = data.title || data.donghua_title || data.name || slug.replace(/-/g, ' ').toUpperCase();
+    const poster = data.poster || data.thumbnail || data.thumb || data.image || data.cover || '';
+    const rating = data.rating || data.score || '';
+    const synopsis =
+      extractText(data.synopsis) ||
+      extractText(data.sinopsis) ||
+      extractText(data.description) ||
+      '';
+
+    // Safe info mapping (ensure only primitive strings to avoid React child crashes)
+    const info: Record<string, string> = {};
+    if (data.info && typeof data.info === 'object') {
+      for (const [k, v] of Object.entries(data.info)) {
+        if (typeof v === 'string' || typeof v === 'number') {
+          info[k] = String(v);
+        } else if (Array.isArray(v)) {
+          info[k] = v.join(', ');
+        } else if (v && typeof v === 'object') {
+          info[k] = (v as any).name || (v as any).title || '';
+        }
+      }
+    }
+
+    // Genre normalization
+    const rawGenres = data.genres || data.genre_list || data.genreList || [];
+    const genres: string[] = Array.isArray(rawGenres)
+      ? rawGenres
+          .map((g: any) => (typeof g === 'string' ? g : g.name || g.title || g.genre_title || ''))
+          .filter(Boolean)
+      : [];
+
+    // Episode List normalization
+    const rawEpisodes = data.episodes || data.episode_list || data.episodes_list || [];
+    const episodes = Array.isArray(rawEpisodes)
+      ? rawEpisodes.map((ep: any, idx: number) => {
+          const epSlug =
+            ep.slug ||
+            ep.episode_endpoint ||
+            ep.endpoint ||
+            ep.id ||
+            ep.href?.split('/').filter(Boolean).pop() ||
+            `${slug}-episode-${idx + 1}`;
+          return {
+            episode: ep.episode || ep.eps || ep.number || idx + 1,
+            title: ep.title || ep.episode_title || ep.name || `Episode ${ep.episode || idx + 1}`,
+            slug: epSlug,
+            date: ep.date || ep.release_date || ep.uploaded_on || '',
+            url: ep.url || '',
+          };
+        })
+      : [];
+
+    // Recommendations normalization
+    const rawRecs = data.recommendations || data.recommended || data.recommendation_list || [];
+    const recommendations = Array.isArray(rawRecs)
+      ? rawRecs.map((rec: any) => ({
+          title: rec.title || rec.name || '',
+          slug: rec.slug || rec.endpoint || rec.id || '',
+          poster: rec.poster || rec.thumbnail || rec.thumb || rec.image || '',
+        }))
+      : [];
+
+    return {
+      title,
+      poster,
+      rating,
+      synopsis,
+      info: Object.keys(info).length > 0 ? info : undefined,
+      genres,
+      batch_link: data.batch_link || data.batchLink,
+      episodes,
+      recommendations,
+    };
   },
 
   async getDonghuaEpisode(slug: string): Promise<DonghuaEpisodeStream | null> {
@@ -202,39 +462,56 @@ export const sankaApi = {
         title: `${slug.replace(/-/g, ' ').toUpperCase()} Subtitle Indonesia`,
       };
     }
-    // New endpoint: /anime/donghua/episode/:slug
-    // Response: { episode, streaming: { main_url: {name,url}, servers: [{name,url}] } }
-    const raw = await sankaFetch<{
-      episode: string;
-      streaming?: { main_url?: { name: string; url: string }; servers?: { name: string; url: string }[] };
-      navigation?: {
-        all_episodes?: { slug?: string; href?: string };
-        previous_episode?: { slug?: string; href?: string } | null;
-        next_episode?: { slug?: string; href?: string } | null;
-      };
-      donghua_details?: { title?: string; slug?: string; poster?: string };
-      download_url?: any;
-    }>(`/anime/donghua/episode/${slug}`, 1800);
+    const raw = await sankaFetch<any>(`/anime/donghua/episode/${slug}`, 1800);
     if (!raw) return null;
+    const data = raw.data || raw;
 
     const streams: { server: string; url: string }[] = [];
-    if (raw.streaming?.servers && raw.streaming.servers.length > 0) {
-      for (const s of raw.streaming.servers) {
-        if (s.url) streams.push({ server: s.name || 'Server', url: s.url });
+    if (data.streaming?.servers && Array.isArray(data.streaming.servers)) {
+      for (const s of data.streaming.servers) {
+        if (s.url) streams.push({ server: s.name || s.server || 'Server', url: s.url });
       }
-    } else if (raw.streaming?.main_url?.url) {
-      streams.push({ server: raw.streaming.main_url.name || 'Main Server', url: raw.streaming.main_url.url });
+    } else if (data.streaming?.main_url?.url) {
+      streams.push({ server: data.streaming.main_url.name || 'Main Server', url: data.streaming.main_url.url });
+    } else if (Array.isArray(data.streams)) {
+      for (const s of data.streams) {
+        if (s.url) streams.push({ server: s.server || s.name || 'Server', url: s.url });
+      }
+    } else if (Array.isArray(data.servers)) {
+      for (const s of data.servers) {
+        if (s.url) streams.push({ server: s.name || s.server || 'Server', url: s.url });
+      }
     }
 
+    const prevSlug =
+      data.navigation?.previous_episode?.slug ||
+      data.navigation?.prev_slug ||
+      data.prev_episode?.slug ||
+      data.prev_slug ||
+      null;
+    const nextSlug =
+      data.navigation?.next_episode?.slug ||
+      data.navigation?.next_slug ||
+      data.next_episode?.slug ||
+      data.next_slug ||
+      null;
+    const allSlug =
+      data.navigation?.all_episodes?.slug ||
+      data.donghua_details?.slug ||
+      data.all_slug ||
+      slug.replace(/-episode-\d+.*$/, '');
+
     return {
-      title: raw.episode,
+      title: data.episode || data.title || `${slug.replace(/-/g, ' ').toUpperCase()}`,
+      release_date: data.release_date || data.date || '',
       navigation: {
-        prev_slug: raw.navigation?.previous_episode?.slug || null,
-        next_slug: raw.navigation?.next_episode?.slug || null,
-        all_slug: raw.navigation?.all_episodes?.slug || raw.donghua_details?.slug || '',
+        prev_slug: prevSlug,
+        next_slug: nextSlug,
+        all_slug: allSlug,
       },
       streams,
-      downloadUrl: raw.download_url || null,
+      downloadUrl: data.download_url || data.download_links || null,
+      anime_info: data.donghua_details || data.anime_info,
     };
   },
 
@@ -244,7 +521,6 @@ export const sankaApi = {
         d.title.toLowerCase().includes(query.toLowerCase())
       );
     }
-    // New search endpoint
     const data = await sankaFetch<{ data?: DonghuaItem[] } | DonghuaItem[]>(
       `/anime/donghua/search/${encodeURIComponent(query)}/1`, 600
     );
@@ -254,11 +530,27 @@ export const sankaApi = {
     return [];
   },
 
-  // Resolve a Sanka server ID to an actual embed URL (Otakudesu)
+  // Resolve a Sanka server ID to an actual embed URL (Otakudesu/Samehadaku)
   async getAnimeServer(serverId: string): Promise<string | null> {
     if (USE_MOCK_DATA) return 'https://desustream.com/dummy-stream';
-    const data = await sankaFetch<{ url: string }>(`/anime/server/${serverId}`, 3600);
-    return data?.url || null;
+    let raw = await sankaFetch<any>(`/anime/server/${serverId}`, 300);
+    if (!raw) {
+      raw = await sankaFetch<any>(`/anime/otakudesu/server/${serverId}`, 300);
+    }
+    if (!raw) return null;
+    // SankaApi may return url under different keys
+    const url =
+      raw?.url ||
+      raw?.data?.url ||
+      raw?.embed_url ||
+      raw?.streaming_url ||
+      raw?.stream_url ||
+      raw?.link ||
+      raw?.data?.embed_url ||
+      raw?.data?.streaming_url ||
+      raw?.data?.link ||
+      null;
+    return typeof url === 'string' && url.startsWith('http') ? url : null;
   },
 
   // --- COMIC / MANGA / MANHWA (Shinigami via Sanka /comic/shinigami/*) ---
@@ -288,10 +580,17 @@ export const sankaApi = {
   async getComicDetail(mangaId: string): Promise<ComicDetail | null> {
     if (USE_MOCK_DATA) {
       const match = mockComicList.find((c) => c.manga_id === mangaId);
+      const isRevengeSwordHound = mangaId.toLowerCase().includes('revenge-iron-blooded') || mangaId.toLowerCase().includes('sword-hound');
       return {
         ...mockComicDetail,
-        title: match ? match.title : mangaId.replace(/-/g, ' ').toUpperCase(),
-        manga_id: mangaId,
+        ...(match ? {
+          ...match,
+          genres: match.genres || mockComicDetail.genres,
+        } : {
+          title: mangaId.replace(/-/g, ' ').toUpperCase(),
+          manga_id: mangaId,
+          description: isRevengeSwordHound ? mockComicDetail.description : '',
+        }),
       };
     }
 
@@ -323,8 +622,16 @@ export const sankaApi = {
             manga_id: mangaId,
           };
         }
-        if ('data' in raw && raw.data && typeof raw.data === 'object') return raw.data as ComicDetail;
-        if ('title' in raw) return raw as ComicDetail;
+        const detailObj = ('data' in raw && raw.data ? raw.data : raw) as any;
+        if (detailObj && typeof detailObj === 'object' && ('title' in detailObj || 'name' in detailObj)) {
+          return {
+            ...detailObj,
+            title: detailObj.title || detailObj.name || mangaId,
+            description: extractText(detailObj.description) || extractText(detailObj.synopsis) || extractText(detailObj.sinopsis) || '',
+            cover: detailObj.cover || detailObj.cover_portrait || detailObj.thumbnail || detailObj.thumb || '',
+            cover_portrait: detailObj.cover_portrait || detailObj.cover || detailObj.thumbnail || '',
+          } as ComicDetail;
+        }
       }
     } catch {
       // Fallback
@@ -377,10 +684,42 @@ export const sankaApi = {
         chapter_id: chapterId,
       };
     }
-    const raw = await sankaFetch<{ data: ChapterReaderData } | ChapterReaderData>(`/comic/shinigami/read/${chapterId}`, 3600);
+    const raw = await sankaFetch<any>(`/comic/shinigami/read/${chapterId}`, 3600);
     if (!raw) return null;
-    if (raw && 'data' in raw && raw.data && typeof raw.data === 'object') return raw.data as ChapterReaderData;
-    return raw as ChapterReaderData;
+    const obj = (raw && 'data' in raw && raw.data && typeof raw.data === 'object' ? raw.data : raw) as any;
+    if (!obj || typeof obj !== 'object') return null;
+
+    const images: string[] = Array.isArray(obj.images)
+      ? obj.images.map((img: any) => (typeof img === 'string' ? img : img.url || img.src || ''))
+      : Array.isArray(obj.chapter_images)
+      ? obj.chapter_images.map((img: any) => (typeof img === 'string' ? img : img.url || img.src || ''))
+      : Array.isArray(obj.pages)
+      ? obj.pages.map((img: any) => (typeof img === 'string' ? img : img.url || img.src || ''))
+      : [];
+
+    const prevChapter =
+      typeof obj.prev_chapter === 'string'
+        ? obj.prev_chapter
+        : obj.prev_chapter?.chapter_id || obj.prev_chapter?.id || obj.prev_chapter?.slug || null;
+    const nextChapter =
+      typeof obj.next_chapter === 'string'
+        ? obj.next_chapter
+        : obj.next_chapter?.chapter_id || obj.next_chapter?.id || obj.next_chapter?.slug || null;
+    const mangaId =
+      typeof obj.manga_id === 'string'
+        ? obj.manga_id
+        : obj.manga_id?.id || obj.manga_id?.slug || obj.mangaId || '';
+
+    return {
+      chapter_id: obj.chapter_id || chapterId,
+      manga_id: mangaId,
+      chapter_number: obj.chapter_number || obj.number || '',
+      chapter_title: obj.chapter_title || obj.title || '',
+      images: images.filter(Boolean),
+      total_images: images.length,
+      prev_chapter: prevChapter,
+      next_chapter: nextChapter,
+    };
   },
 
   async searchComic(query: string): Promise<ComicItem[]> {
@@ -447,7 +786,18 @@ export const sankaApi = {
       ? `/anime/donghua/completed/${page}`
       : `/anime/donghua/ongoing/${page}`;
     const raw = await sankaFetch<any>(endpoint, 3600);
-    const list = raw?.ongoing_donghua || raw?.completed_donghua || [];
+    const data = raw?.data || raw;
+    const rawList = data?.ongoing_donghua || data?.completed_donghua || (Array.isArray(data) ? data : []);
+    const list: DonghuaItem[] = rawList.map((d: any) => ({
+      title: d.title || d.donghua_title || d.name || '',
+      slug: d.slug || d.endpoint || d.id || '',
+      poster: d.poster || d.thumbnail || d.thumb || d.image || '',
+      synopsis: extractText(d.synopsis) || extractText(d.sinopsis) || '',
+      rating: d.rating || d.score || '',
+      status: d.status || (status === 'completed' ? 'Completed' : 'Ongoing'),
+      episodes: d.episodes || d.episode || d.total_episode || '',
+      type: d.type || 'Donghua',
+    }));
     return {
       donghuaList: list,
       total: list.length > 0 ? 300 : 0,
@@ -459,8 +809,19 @@ export const sankaApi = {
     if (USE_MOCK_DATA) {
       return mockDonghuaList.filter((d) => d.status === 'Ongoing');
     }
-    const raw = await sankaFetch<{ ongoing_donghua: DonghuaItem[] }>('/anime/donghua/ongoing/1', 1200);
-    return raw?.ongoing_donghua || [];
+    const raw = await sankaFetch<any>('/anime/donghua/ongoing/1', 1200);
+    const data = raw?.data || raw;
+    const rawList = data?.ongoing_donghua || (Array.isArray(data) ? data : []);
+    return rawList.map((d: any) => ({
+      title: d.title || d.donghua_title || d.name || '',
+      slug: d.slug || d.endpoint || d.id || '',
+      poster: d.poster || d.thumbnail || d.thumb || d.image || '',
+      synopsis: extractText(d.synopsis) || extractText(d.sinopsis) || '',
+      rating: d.rating || d.score || '',
+      status: d.status || 'Ongoing',
+      episodes: d.episodes || d.episode || '',
+      type: d.type || 'Donghua',
+    }));
   },
 
   async getComicList(page = 1, limit = 24, format?: string): Promise<{ comicList: ComicItem[]; total: number; totalPages: number }> {
@@ -518,19 +879,20 @@ export const sankaApi = {
       return list.map((g: any) => ({
         name: g.title || g.name,
         slug: g.genreId || g.slug,
-        count: g.count || 24,
       }));
     }
     return mockGenreList;
   },
 
-  async getAnimeByGenre(genreSlug: string): Promise<AnimeOngoingItem[]> {
+  async getAnimeByGenre(genreSlug: string, page = 1): Promise<{ animeList: AnimeOngoingItem[]; totalPages: number; total: number }> {
     if (USE_MOCK_DATA) {
-      return mockAnimeOngoing;
+      return { animeList: mockAnimeOngoing, totalPages: 1, total: mockAnimeOngoing.length };
     }
-    const raw = await sankaFetch<any>(`/anime/genre/${encodeURIComponent(genreSlug)}`, 3600);
-    const list = raw?.data?.animeList || raw?.animeList || raw;
-    return Array.isArray(list) ? list : [];
+    const raw = await sankaFetch<any>(`/anime/genre/${encodeURIComponent(genreSlug)}?page=${page}`, 3600);
+    const list: AnimeOngoingItem[] = raw?.data?.animeList || raw?.animeList || (Array.isArray(raw) ? raw : []);
+    const totalPages: number = raw?.pagination?.totalPages || raw?.data?.pagination?.totalPages || 1;
+    const total: number = raw?.pagination?.total || raw?.data?.pagination?.total || list.length;
+    return { animeList: list, totalPages, total };
   },
 
   // --- SCHEDULES ---
@@ -558,6 +920,30 @@ export const sankaApi = {
         this.getDonghuaSchedule(),
       ]);
 
+      // Poster map for common donghua titles when the API omits poster/thumbnail
+      const DONGHUA_POSTER_MAP: Record<string, string> = {
+        'perfect-world': 'https://donghive.vip/wp-content/uploads/2025/02/perfect-world-poster-1-rotated.jpg',
+        'soul-land-2': 'https://cdn.myanimelist.net/images/anime/1041/136706.jpg',
+        'btth': 'https://cdn.myanimelist.net/images/anime/1660/125866.jpg',
+        'battle-through-the-heavens': 'https://cdn.myanimelist.net/images/anime/1660/125866.jpg',
+        'swallowed-star': 'https://cdn.myanimelist.net/images/anime/1169/110599.jpg',
+        'renegade-immortal': 'https://cdn.myanimelist.net/images/anime/1077/137682.jpg',
+        'a-will-eternal': 'https://cdn.myanimelist.net/images/anime/1004/108920.jpg',
+        'shrouding-the-heavens': 'https://cdn.myanimelist.net/images/anime/1063/135118.jpg',
+        'martial-universe': 'https://cdn.myanimelist.net/images/anime/1792/101831.jpg',
+        'stellar-transformation': 'https://cdn.myanimelist.net/images/anime/1150/96112.jpg',
+        'rmji': 'https://cdn.myanimelist.net/images/anime/1429/108922.jpg',
+        'record-of-a-mortals-journey-to-immortality': 'https://cdn.myanimelist.net/images/anime/1429/108922.jpg',
+        'jade-dynasty': 'https://cdn.myanimelist.net/images/anime/1202/125867.jpg',
+        'against-the-gods': 'https://cdn.myanimelist.net/images/anime/1199/139366.jpg',
+        'big-brother': 'https://cdn.myanimelist.net/images/anime/1676/133034.jpg',
+        'apotheosis': 'https://cdn.myanimelist.net/images/anime/1915/129759.jpg',
+        'tales-of-demons-and-gods': 'https://cdn.myanimelist.net/images/anime/1067/92842.jpg',
+        'the-kings-avatar': 'https://cdn.myanimelist.net/images/anime/1004/142991.jpg',
+      };
+
+      const PLACEHOLDER_POSTER = 'https://cdn.myanimelist.net/images/anime/1341/136870.jpg';
+
       const DAYS_ORDER = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
       const DAYS_EN: Record<string, string> = {
         Senin: 'Monday',
@@ -583,20 +969,22 @@ export const sankaApi = {
               episode: 'Episode Terbaru',
               type: 'anime',
               animeId: a.slug || a.title.toLowerCase().replace(/\s+/g, '-'),
-              poster: a.poster || 'https://images.unsplash.com/photo-1578632767115-351597cf2477?w=600&auto=format&fit=crop&q=80',
+              poster: a.poster || PLACEHOLDER_POSTER,
             });
           }
         }
 
         if (dDay?.donghua_list) {
           for (const d of dDay.donghua_list) {
+            const dSlug = d.slug || d.title.toLowerCase().replace(/\s+/g, '-');
+            const mappedPoster = DONGHUA_POSTER_MAP[dSlug];
             entries.push({
               title: d.title,
               time: 'Update Harian',
               episode: 'Episode Terbaru',
               type: 'donghua',
-              animeId: d.slug || d.title.toLowerCase().replace(/\s+/g, '-'),
-              poster: 'https://images.unsplash.com/photo-1578632767115-351597cf2477?w=600&auto=format&fit=crop&q=80',
+              animeId: dSlug,
+              poster: (d as any).poster || (d as any).image || (d as any).thumbnail || (d as any).cover || mappedPoster || PLACEHOLDER_POSTER,
             });
           }
         }

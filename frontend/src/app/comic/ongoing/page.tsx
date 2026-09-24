@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { sankaApi } from '@/lib/sanka-api';
 import MediaCard from '@/components/ui/MediaCard';
+import SectionHeader from '@/components/ui/SectionHeader';
 import { AdBanner } from '@/components/ads/AdBanner';
 import { BookOpen } from 'lucide-react';
 
@@ -51,6 +52,13 @@ export default async function ComicOngoingPage() {
 
         {/* Ad Placement */}
         <AdBanner slotId="comic-leaderboard" className="mb-8" />
+
+        {/* Section Header */}
+        <SectionHeader
+          title="Seluruh Komik & Manhwa On-Going"
+          badge={`${comicList.length} Judul`}
+          subtitle="Serial komik populer yang rutin merilis chapter terjemahan bahasa Indonesia terbaru"
+        />
 
         {/* Comic Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">

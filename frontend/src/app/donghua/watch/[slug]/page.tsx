@@ -14,10 +14,15 @@ interface DonghuaWatchPageProps {
   }>;
 }
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 300;
 
 export default async function DonghuaWatchPage({ params }: DonghuaWatchPageProps) {
   const { slug } = await params;
+
+  if (!slug || slug.length > 150 || slug.includes('/') || slug.includes('..')) {
+    notFound();
+  }
+
   const streamData = await sankaApi.getDonghuaEpisode(slug);
 
   if (!streamData) {

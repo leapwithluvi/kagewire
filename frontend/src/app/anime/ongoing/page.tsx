@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { sankaApi } from '@/lib/sanka-api';
 import MediaCard from '@/components/ui/MediaCard';
+import SectionHeader from '@/components/ui/SectionHeader';
 import { AdBanner } from '@/components/ads/AdBanner';
 import { Calendar } from 'lucide-react';
 
@@ -81,6 +82,13 @@ export default async function AnimeOngoingPage({ searchParams }: PageProps) {
 
         {/* Ad Placement */}
         <AdBanner slotId="anime-leaderboard" className="mb-8" />
+
+        {/* Section Header */}
+        <SectionHeader
+          title={currentDay === 'Semua' ? 'Seluruh Anime On-Going' : `Anime Tayang Hari ${currentDay}`}
+          badge={`${animeList.length} Judul`}
+          subtitle="Episode terbaru diperbarui secara berkala sesuai jam tayang resmi di Jepang"
+        />
 
         {/* Anime Grid */}
         {animeList.length === 0 ? (

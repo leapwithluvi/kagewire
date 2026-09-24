@@ -2,10 +2,11 @@ import React from 'react';
 import Link from 'next/link';
 import { sankaApi } from '@/lib/sanka-api';
 import MediaCard from '@/components/ui/MediaCard';
+import SectionHeader from '@/components/ui/SectionHeader';
 import { AdBanner } from '@/components/ads/AdBanner';
 import { Calendar, Sparkles } from 'lucide-react';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 180;
 
 export default async function AnimeHubPage() {
   const [otakudesuData, samehadakuData] = await Promise.all([
@@ -109,14 +110,14 @@ export default async function AnimeHubPage() {
 
       {/* Unified Sedang Tayang & Update Terbaru Section */}
       <section className="mb-14">
-        <div className="flex items-baseline justify-between mb-5 border-b border-border-subtle pb-3">
-          <h2 className="font-editorial text-xl font-normal text-content-primary">
-            Sedang Tayang & Update Terbaru (Ongoing)
-          </h2>
-          <span className="text-xs text-content-muted num-tabular">
-            {combinedOngoing.length} Judul
-          </span>
-        </div>
+        <SectionHeader
+          title="Sedang Tayang & Update Terbaru (Ongoing)"
+          badge={`${combinedOngoing.length} Judul`}
+          subtitle="Update episode anime terbaru setiap hari dengan kualitas Full HD"
+          icon={<Sparkles className="w-4 h-4 text-amber" />}
+          actionHref="/anime/ongoing"
+          actionText="Semua Ongoing"
+        />
         {combinedOngoing.length > 0 ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {combinedOngoing.map((anime) => (
@@ -147,14 +148,13 @@ export default async function AnimeHubPage() {
       {/* Completed Anime (Tamat) */}
       {completedList.length > 0 && (
         <section className="mb-14">
-          <div className="flex items-baseline justify-between mb-5 border-b border-border-subtle pb-3">
-            <h2 className="font-editorial text-xl font-normal text-content-primary">
-              Anime Tamat (Completed)
-            </h2>
-            <span className="text-xs text-content-muted num-tabular">
-              {completedList.length} Judul
-            </span>
-          </div>
+          <SectionHeader
+            title="Anime Tamat (Completed)"
+            badge={`${completedList.length} Judul`}
+            subtitle="Koleksi serial anime yang telah tamat dan siap ditonton marathon"
+            actionHref="/anime/list"
+            actionText="Katalog Tamat"
+          />
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {completedList.map((anime) => (
               <MediaCard

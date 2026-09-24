@@ -3,7 +3,9 @@ import { sankaApi } from '@/lib/sanka-api';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const q = searchParams.get('q')?.trim() || '';
+  const rawQ = searchParams.get('q')?.trim() || '';
+  // Sanitize control characters and cap max length to 80 chars
+  const q = rawQ.replace(/[\x00-\x1F\x7F]/g, '').slice(0, 80).trim();
 
   if (!q || q.length < 2) {
     return NextResponse.json({ results: [] });
@@ -46,9 +48,15 @@ export async function GET(request: Request) {
       })),
     ].slice(0, 7);
 
-    return NextResponse.json({ results });
-  } catch (error) {
-    console.error('Live search API error:', error);
+    return NextResponse.json(
+      { results },
+      {
+        headers: {
+          'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120',
+        },
+      }
+    );
+  } catch {
     return NextResponse.json({ results: [] });
   }
 }

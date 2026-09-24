@@ -2,13 +2,15 @@ import React from 'react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { sankaApi } from '@/lib/sanka-api';
-import { Star, Play, Film, Calendar, Clock, Tv } from 'lucide-react';
+import { Star, Play, Film, Calendar, Clock, Tv, Sparkles } from 'lucide-react';
 import MediaCard from '@/components/ui/MediaCard';
+import SectionHeader from '@/components/ui/SectionHeader';
 import { AdBanner } from '@/components/ads/AdBanner';
 import { StackedDetailBanners } from '@/components/ads/StackedDetailBanners';
 import { DetailPopupAd } from '@/components/ads/DetailPopupAd';
 import { StickyFooterAd } from '@/components/ads/StickyFooterAd';
 import { MediaItemListFilter } from '@/components/media/MediaItemListFilter';
+import { getResolvedSynopsis } from '@/lib/synopsis-helper';
 
 interface AnimeDetailPageProps {
   params: Promise<{
@@ -17,22 +19,55 @@ interface AnimeDetailPageProps {
   }>;
 }
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 300;
+
+const ALLOWED_ANIME_SOURCES = ['otakudesu', 'samehadaku'];
 
 export default async function AnimeDetailPage({ params }: AnimeDetailPageProps) {
   const { source, slug } = await params;
+
+  // Security: validate source allowlist and prevent path traversal
+  if (
+    !source ||
+    !ALLOWED_ANIME_SOURCES.includes(source) ||
+    !slug ||
+    slug.length > 150 ||
+    slug.includes('/') ||
+    slug.includes('..')
+  ) {
+    notFound();
+  }
+
   const anime = await sankaApi.getAnimeDetail(source, slug);
 
   if (!anime) {
     notFound();
   }
 
-  let synopsisText = '';
-  if (typeof anime.synopsis === 'string') {
-    synopsisText = anime.synopsis;
-  } else if (anime.synopsis && Array.isArray(anime.synopsis.paragraphs)) {
-    synopsisText = anime.synopsis.paragraphs.join('\n\n');
+  // Extract raw synopsis from all known fields
+  let rawSynopsis = '';
+  if (typeof anime.synopsis === 'string' && anime.synopsis.trim()) {
+    rawSynopsis = anime.synopsis.replace(/<[^>]*>/g, '').trim();
+  } else if (Array.isArray(anime.synopsis)) {
+    rawSynopsis = anime.synopsis.map((p) => (typeof p === 'string' ? p.replace(/<[^>]*>/g, '').trim() : String(p))).join('\n\n');
+  } else if (anime.synopsis && Array.isArray((anime.synopsis as any).paragraphs)) {
+    rawSynopsis = (anime.synopsis as any).paragraphs.map((p: any) => String(p).replace(/<[^>]*>/g, '').trim()).join('\n\n');
+  } else if ((anime as any).sinopsis) {
+    const s = (anime as any).sinopsis;
+    rawSynopsis = typeof s === 'string' ? s.replace(/<[^>]*>/g, '').trim() : Array.isArray(s) ? s.join('\n\n') : '';
+  } else if ((anime as any).description) {
+    const d = (anime as any).description;
+    rawSynopsis = typeof d === 'string' ? d.replace(/<[^>]*>/g, '').trim() : Array.isArray(d) ? d.join('\n\n') : '';
   }
+
+  const genreNames = (anime.genreList || []).map((g: any) => g.title || g.name || '');
+  const synopsisText = getResolvedSynopsis(
+    anime.title,
+    'anime',
+    rawSynopsis,
+    genreNames,
+    String(anime.status || '')
+  );
 
   const episodeList = anime.episodeList || [];
   const recommendedList = anime.recommendedAnimeList || [];
@@ -56,7 +91,7 @@ export default async function AnimeDetailPage({ params }: AnimeDetailPageProps) 
             <div className="relative aspect-[3/4] w-56 sm:w-64 md:w-full rounded-md overflow-hidden bg-surface-card border border-border-subtle shadow-cinematic">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={anime.poster}
+                src={anime.poster || 'https://images.unsplash.com/photo-1578632767115-351597cf2477?w=600&auto=format&fit=crop&q=80'}
                 alt={anime.title}
                 className="w-full h-full object-cover"
               />
@@ -70,7 +105,7 @@ export default async function AnimeDetailPage({ params }: AnimeDetailPageProps) 
 
             {episodeList.length > 0 && (
               <Link
-                href={`/watch/${source}/${episodeList[0].episodeId || episodeList[0].href?.split('/').pop()}`}
+                href={episodeList[0].href || `/watch/${source}/${episodeList[0].episodeId || episodeList[0].href?.split('/').pop()}`}
                 className="mt-4 w-56 sm:w-64 md:w-full flex items-center justify-center gap-2 py-3 rounded-lg bg-gradient-to-r from-amber to-amber-hover text-background text-xs font-bold hover:brightness-110 active:scale-95 transition-all shadow-md shadow-amber/25"
               >
                 <Play className="w-4 h-4 fill-background" />
@@ -143,7 +178,7 @@ export default async function AnimeDetailPage({ params }: AnimeDetailPageProps) 
               Sinopsis
             </h3>
             <p className="text-xs sm:text-sm text-content-secondary leading-relaxed whitespace-pre-line max-w-3xl">
-              {synopsisText || 'Belum ada sinopsis untuk judul ini.'}
+              {synopsisText}
             </p>
           </div>
         </div>
@@ -157,9 +192,12 @@ export default async function AnimeDetailPage({ params }: AnimeDetailPageProps) 
         <MediaItemListFilter
           items={episodeList.map((ep, idx) => {
             const epId = ep.episodeId || ep.href?.split('/').filter(Boolean).pop() || String(idx + 1);
+            // Extract episode number from eps field or title
+            const titleStr = String(ep.title ?? '');
+            const epNum = ep.eps ?? (titleStr.match(/(?:episode\s*|ep\s*)(\d+)/i)?.[1] ? Number(titleStr.match(/(?:episode\s*|ep\s*)(\d+)/i)![1]) : idx + 1);
             return {
               id: `${epId}-${idx}`,
-              title: String(ep.title),
+              title: `Episode ${epNum}`,
               href: `/watch/${source}/${epId}`,
               subtitle: ep.date,
               type: 'episode' as const,
@@ -178,11 +216,12 @@ export default async function AnimeDetailPage({ params }: AnimeDetailPageProps) 
       {/* Recommendations */}
       {recommendedList.length > 0 && (
         <section>
-          <div className="flex items-baseline justify-between mb-4 border-b border-border-subtle pb-3">
-            <h2 className="font-editorial text-xl font-normal text-content-primary">
-              Rekomendasi Serupa
-            </h2>
-          </div>
+          <SectionHeader
+            title="Rekomendasi Serupa"
+            badge={`${recommendedList.length} Judul`}
+            subtitle="Anime pilihan serupa dengan cerita dan genre yang relevan"
+            icon={<Sparkles className="w-4 h-4 text-amber" />}
+          />
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {recommendedList.slice(0, 5).map((rec) => (
               <MediaCard

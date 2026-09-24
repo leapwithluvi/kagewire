@@ -154,12 +154,13 @@ export function ComicScheduleClientView({ initialSchedule }: ComicScheduleClient
             {filteredDays.map((day) => (
               <div key={day.day} className="space-y-4">
                 {/* Day Divider Banner */}
-                <div className="flex items-center justify-between p-4 rounded-xl bg-surface-card border border-border-subtle shadow-sm">
-                  <div className="flex items-center gap-2.5">
-                    <h2 className="font-editorial text-xl sm:text-2xl font-bold text-content-primary">
+                <div className="relative overflow-hidden flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-xl bg-gradient-to-r from-surface-card via-surface-card/95 to-surface-secondary/70 border border-border-subtle shadow-sm">
+                  <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-amber via-amber-light to-amber shadow-[0_0_10px_rgba(245,158,11,0.5)]" />
+                  <div className="flex items-center gap-2.5 pl-2">
+                    <h2 className="font-editorial text-xl sm:text-2xl font-bold text-white tracking-tight">
                       {day.day}
                     </h2>
-                    <span className="text-xs font-mono text-content-muted">
+                    <span className="text-xs font-mono text-content-secondary">
                       ({day.dayEn})
                     </span>
                     {day.isToday && (
@@ -169,7 +170,7 @@ export function ComicScheduleClientView({ initialSchedule }: ComicScheduleClient
                       </span>
                     )}
                   </div>
-                  <span className="text-xs font-mono text-content-muted">
+                  <span className="text-xs font-mono font-semibold text-amber bg-amber/10 border border-amber/30 px-2.5 py-1 rounded-full self-start sm:self-auto ml-2 sm:ml-0">
                     {day.entries.length} Judul Rilis
                   </span>
                 </div>

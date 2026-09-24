@@ -27,10 +27,11 @@ export default function MediaCard({
   rating,
   releaseDay,
 }: MediaCardProps) {
-  const typeBadgeColors = {
+  const typeBadgeColors: Record<string, string> = {
     anime: 'bg-amber/20 text-amber border-amber/40',
     donghua: 'bg-cyan-500/20 text-cyan-400 border-cyan-500/40',
     comic: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40',
+    komik: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40',
   };
 
   const badgeColor = typeBadgeColors[type] || 'bg-amber/20 text-amber border-amber/40';
