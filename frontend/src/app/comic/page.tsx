@@ -91,31 +91,30 @@ export default async function ComicHubPage() {
       {/* Leaderboard Ad */}
       <AdBanner slotId="comic-leaderboard" className="mb-10" />
 
-      {/* Popular Comics: 4-5 items, swipeable on mobile */}
+      {/* Popular Comics: standard responsive grid (2-cols on mobile) */}
       <section className="mb-14">
         <SectionHeader
           title="Komik Terpopuler Minggu Ini"
-          badge={`${Math.min(popularComics.length, 5)} Judul`}
+          badge={`${Math.min(popularComics.length, 10)} Judul`}
           subtitle="Manhwa, Manga, dan Manhua terfavorit dengan pembaca terbanyak"
           icon={<Flame className="w-4 h-4 text-amber" />}
           actionHref="/comic/ongoing"
           actionText="Semua Populer"
         />
         {popularComics.length > 0 ? (
-          <div className="flex overflow-x-auto gap-4 pb-3 pt-1 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-4 lg:grid-cols-5 sm:overflow-visible snap-x snap-mandatory scrollbar-none">
-            {popularComics.slice(0, 5).map((comic) => (
-              <div key={comic.manga_id} className="min-w-[155px] sm:min-w-0 flex-shrink-0 snap-start">
-                <MediaCard
-                  id={comic.manga_id}
-                  title={comic.title}
-                  poster={comic.cover_portrait || comic.cover}
-                  type="comic"
-                  href={`/comic/${comic.manga_id}`}
-                  rating={comic.rating}
-                  badge={comic.latest_chapter ? `Ch. ${comic.latest_chapter}` : undefined}
-                  subtitle={comic.format || 'Manhwa'}
-                />
-              </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            {popularComics.slice(0, 10).map((comic) => (
+              <MediaCard
+                key={comic.manga_id}
+                id={comic.manga_id}
+                title={comic.title}
+                poster={comic.cover_portrait || comic.cover}
+                type="comic"
+                href={`/comic/${comic.manga_id}`}
+                rating={comic.rating}
+                badge={comic.latest_chapter ? `Ch. ${comic.latest_chapter}` : undefined}
+                subtitle={comic.format || 'Manhwa'}
+              />
             ))}
           </div>
         ) : (

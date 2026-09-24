@@ -83,31 +83,30 @@ export default async function DonghuaHubPage() {
       {/* Leaderboard Ad */}
       <AdBanner slotId="donghua-leaderboard" className="mb-10" />
 
-      {/* Popular Donghua: 4-5 items, swipeable on mobile */}
+      {/* Popular Donghua: standard responsive grid (2-cols on mobile) */}
       <section className="mb-14">
         <SectionHeader
           title="Donghua Terpopuler"
-          badge={`${Math.min(popular.length, 5)} Serial`}
+          badge={`${Math.min(popular.length, 10)} Serial`}
           subtitle="Serial animasi 3D & 2D Tiongkok paling banyak disaksikan"
           icon={<Flame className="w-4 h-4 text-amber" />}
           actionHref="/donghua/ongoing"
           actionText="Semua Populer"
         />
         {popular.length > 0 ? (
-          <div className="flex overflow-x-auto gap-4 pb-3 pt-1 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-4 lg:grid-cols-5 sm:overflow-visible snap-x snap-mandatory scrollbar-none">
-            {popular.slice(0, 5).map((item) => (
-              <div key={item.slug} className="min-w-[155px] sm:min-w-0 flex-shrink-0 snap-start">
-                <MediaCard
-                  id={item.slug}
-                  title={item.title}
-                  poster={item.poster}
-                  type="donghua"
-                  href={`/donghua/${item.slug}`}
-                  rating={item.rating || '9.6'}
-                  badge={item.status || 'Ongoing'}
-                  subtitle={item.type || '3D Animation'}
-                />
-              </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            {popular.slice(0, 10).map((item) => (
+              <MediaCard
+                key={item.slug}
+                id={item.slug}
+                title={item.title}
+                poster={item.poster}
+                type="donghua"
+                href={`/donghua/${item.slug}`}
+                rating={item.rating || '9.6'}
+                badge={item.status || 'Ongoing'}
+                subtitle={item.type || '3D Animation'}
+              />
             ))}
           </div>
         ) : (
