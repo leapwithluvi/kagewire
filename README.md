@@ -487,7 +487,7 @@ Create `.env.local` in `frontend/`:
 
 ```env
 # Upstream REST API URL
-NEXT_PUBLIC_SANKA_API_URL=https://www.sankavollerei.web.id
+NEXT_PUBLIC_SANKA_API_URL=your_api_key
 
 # Mock Data Control: Set to 'false' for live upstream scraping, 'true' for local offline mode
 NEXT_PUBLIC_USE_MOCK=false
