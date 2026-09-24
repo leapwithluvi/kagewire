@@ -915,31 +915,86 @@ export const sankaApi = {
       return mockSchedule;
     }
     try {
-      const [animeSched, donghuaSched] = await Promise.all([
+      const [animeSched, donghuaSched, donghuaHome] = await Promise.all([
         this.getAnimeSchedule(),
         this.getDonghuaSchedule(),
+        this.getDonghuaHome(),
       ]);
 
-      // Poster map for common donghua titles when the API omits poster/thumbnail
+      // Build a live poster lookup from donghuaHome data (popular + latest + slider)
+      const livePosterMap: Record<string, string> = {};
+      if (donghuaHome) {
+        const allDonghua = [
+          ...(donghuaHome.popular || []),
+          ...(donghuaHome.latest || []),
+          ...(donghuaHome.slider || []),
+        ];
+        for (const item of allDonghua) {
+          if (item.slug && item.poster) {
+            livePosterMap[item.slug] = item.poster;
+            // Also index by normalized slug variations
+            const normalized = item.slug.toLowerCase().replace(/[^a-z0-9-]/g, '');
+            livePosterMap[normalized] = item.poster;
+          }
+        }
+      }
+
+      // Extended static poster map for common donghua titles when the API omits poster/thumbnail
       const DONGHUA_POSTER_MAP: Record<string, string> = {
-        'perfect-world': 'https://donghive.vip/wp-content/uploads/2025/02/perfect-world-poster-1-rotated.jpg',
+        // Cultivation / Xianxia
+        'perfect-world': 'https://cdn.myanimelist.net/images/anime/1804/139390.jpg',
+        'soul-land': 'https://cdn.myanimelist.net/images/anime/1038/111659.jpg',
         'soul-land-2': 'https://cdn.myanimelist.net/images/anime/1041/136706.jpg',
+        'soul-land-3': 'https://cdn.myanimelist.net/images/anime/1041/136706.jpg',
         'btth': 'https://cdn.myanimelist.net/images/anime/1660/125866.jpg',
         'battle-through-the-heavens': 'https://cdn.myanimelist.net/images/anime/1660/125866.jpg',
         'swallowed-star': 'https://cdn.myanimelist.net/images/anime/1169/110599.jpg',
         'renegade-immortal': 'https://cdn.myanimelist.net/images/anime/1077/137682.jpg',
+        'xian-ni': 'https://cdn.myanimelist.net/images/anime/1077/137682.jpg',
         'a-will-eternal': 'https://cdn.myanimelist.net/images/anime/1004/108920.jpg',
         'shrouding-the-heavens': 'https://cdn.myanimelist.net/images/anime/1063/135118.jpg',
         'martial-universe': 'https://cdn.myanimelist.net/images/anime/1792/101831.jpg',
+        'wu-dong-qian-kun': 'https://cdn.myanimelist.net/images/anime/1792/101831.jpg',
         'stellar-transformation': 'https://cdn.myanimelist.net/images/anime/1150/96112.jpg',
+        'xing-chen-bian': 'https://cdn.myanimelist.net/images/anime/1150/96112.jpg',
         'rmji': 'https://cdn.myanimelist.net/images/anime/1429/108922.jpg',
         'record-of-a-mortals-journey-to-immortality': 'https://cdn.myanimelist.net/images/anime/1429/108922.jpg',
+        'fanren-xiu-xian-zhuan': 'https://cdn.myanimelist.net/images/anime/1429/108922.jpg',
         'jade-dynasty': 'https://cdn.myanimelist.net/images/anime/1202/125867.jpg',
+        'zhu-xian': 'https://cdn.myanimelist.net/images/anime/1202/125867.jpg',
         'against-the-gods': 'https://cdn.myanimelist.net/images/anime/1199/139366.jpg',
-        'big-brother': 'https://cdn.myanimelist.net/images/anime/1676/133034.jpg',
+        'ni-tian-xie-shen': 'https://cdn.myanimelist.net/images/anime/1199/139366.jpg',
         'apotheosis': 'https://cdn.myanimelist.net/images/anime/1915/129759.jpg',
+        'bai-lian-cheng-shen': 'https://cdn.myanimelist.net/images/anime/1915/129759.jpg',
         'tales-of-demons-and-gods': 'https://cdn.myanimelist.net/images/anime/1067/92842.jpg',
+        'yao-shen-ji': 'https://cdn.myanimelist.net/images/anime/1067/92842.jpg',
         'the-kings-avatar': 'https://cdn.myanimelist.net/images/anime/1004/142991.jpg',
+        'quan-zhi-gao-shou': 'https://cdn.myanimelist.net/images/anime/1004/142991.jpg',
+        'big-brother': 'https://cdn.myanimelist.net/images/anime/1676/133034.jpg',
+        'da-ge': 'https://cdn.myanimelist.net/images/anime/1676/133034.jpg',
+        'martial-master': 'https://cdn.myanimelist.net/images/anime/1266/121397.jpg',
+        'wu-zong': 'https://cdn.myanimelist.net/images/anime/1266/121397.jpg',
+        'the-great-ruler': 'https://cdn.myanimelist.net/images/anime/1296/121398.jpg',
+        'da-zhu-zai': 'https://cdn.myanimelist.net/images/anime/1296/121398.jpg',
+        'medical-return': 'https://cdn.myanimelist.net/images/anime/1341/136870.jpg',
+        'doupo-cangqiong': 'https://cdn.myanimelist.net/images/anime/1660/125866.jpg',
+        'the-daily-life-of-the-immortal-king': 'https://cdn.myanimelist.net/images/anime/1303/122228.jpg',
+        'xian-wang-de-richang-shenghuo': 'https://cdn.myanimelist.net/images/anime/1303/122228.jpg',
+        'dragon-prince-yuan': 'https://cdn.myanimelist.net/images/anime/1151/120440.jpg',
+        'yuan-zun': 'https://cdn.myanimelist.net/images/anime/1151/120440.jpg',
+        'longevity': 'https://cdn.myanimelist.net/images/anime/1341/136870.jpg',
+        'wan-gu-chang-sheng': 'https://cdn.myanimelist.net/images/anime/1341/136870.jpg',
+        'the-strongest-system': 'https://cdn.myanimelist.net/images/anime/1341/136870.jpg',
+        'chaotic-sword-god': 'https://cdn.myanimelist.net/images/anime/1341/136870.jpg',
+        'hun-tian-shen-ding': 'https://cdn.myanimelist.net/images/anime/1341/136870.jpg',
+        'spirit-sword-sovereign': 'https://cdn.myanimelist.net/images/anime/1341/136870.jpg',
+        'ling-jian-zun': 'https://cdn.myanimelist.net/images/anime/1341/136870.jpg',
+        'immortal-reborn': 'https://cdn.myanimelist.net/images/anime/1341/136870.jpg',
+        'reverend-insanity': 'https://cdn.myanimelist.net/images/anime/1341/136870.jpg',
+        'gu-zhen-ren': 'https://cdn.myanimelist.net/images/anime/1341/136870.jpg',
+        'star-martial-god-technique': 'https://cdn.myanimelist.net/images/anime/1341/136870.jpg',
+        'return-of-the-immortal-emperor': 'https://cdn.myanimelist.net/images/anime/1341/136870.jpg',
+        'wan-gu-shen-wang': 'https://cdn.myanimelist.net/images/anime/1341/136870.jpg',
       };
 
       const PLACEHOLDER_POSTER = 'https://cdn.myanimelist.net/images/anime/1341/136870.jpg';
@@ -977,14 +1032,27 @@ export const sankaApi = {
         if (dDay?.donghua_list) {
           for (const d of dDay.donghua_list) {
             const dSlug = d.slug || d.title.toLowerCase().replace(/\s+/g, '-');
-            const mappedPoster = DONGHUA_POSTER_MAP[dSlug];
+            const dSlugNorm = dSlug.toLowerCase().replace(/[^a-z0-9-]/g, '');
+
+            // Priority: API field > live donghuaHome cache > static map > placeholder
+            const poster =
+              (d as any).poster ||
+              (d as any).image ||
+              (d as any).thumbnail ||
+              (d as any).cover ||
+              livePosterMap[dSlug] ||
+              livePosterMap[dSlugNorm] ||
+              DONGHUA_POSTER_MAP[dSlug] ||
+              DONGHUA_POSTER_MAP[dSlugNorm] ||
+              PLACEHOLDER_POSTER;
+
             entries.push({
               title: d.title,
               time: 'Update Harian',
               episode: 'Episode Terbaru',
               type: 'donghua',
               animeId: dSlug,
-              poster: (d as any).poster || (d as any).image || (d as any).thumbnail || (d as any).cover || mappedPoster || PLACEHOLDER_POSTER,
+              poster,
             });
           }
         }
@@ -998,7 +1066,7 @@ export const sankaApi = {
 
       if (result.length > 0) return result;
     } catch {
-      // Fallback
+      // Fallback to mock data on any upstream error
     }
     return mockSchedule;
   },
